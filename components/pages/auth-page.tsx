@@ -51,13 +51,9 @@ const TITLES: Record<AuthMode, { eyebrow: string; title: string; subtitle: strin
 function AuthBrand() {
   return (
     <div className="auth-brand">
-      <div className="window-dots" aria-hidden="true">
-        <span className="window-dot red" />
-        <span className="window-dot yellow" />
-        <span className="window-dot green" />
-      </div>
-      <span>dashboard-pessoal</span>
-      <span className="auth-brand-file">conta.supabase</span>
+      <span className="auth-brand-app">dashboard</span>
+      <span className="auth-brand-slash">/</span>
+      <span className="auth-brand-file">acesso</span>
     </div>
   );
 }
@@ -564,10 +560,6 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                     )}
                     Criar conta
                   </button>
-                  <p className="auth-hint">
-                    Ao criar a conta, seus dados continuam no seu projeto Supabase e protegidos por
-                    RLS. O modo local permanece disponível se você sair.
-                  </p>
                 </form>
               ) : (
                 <form className="auth-form" onSubmit={(event) => void submitRecover(event)}>
@@ -634,10 +626,7 @@ function AuthFeedback({ feedback }: { feedback: Feedback }) {
 function AuthFooter() {
   return (
     <footer className="auth-footer">
-      <span>
-        <ShieldCheck size={13} /> Conexão direta com Supabase
-      </span>
-      <Link href="/">Modo local</Link>
+      <Link href="/">Continuar no modo local</Link>
     </footer>
   );
 }

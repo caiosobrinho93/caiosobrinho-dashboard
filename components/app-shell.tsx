@@ -63,10 +63,7 @@ function TitleBar({
   return (
     <header className="titlebar">
       <div className="titlebar-left">
-        {/* 3 dots removed */}
-        <span className="titlebar-title">
-          dashboard-pessoal <span>— Visual Studio Code</span>
-        </span>
+        <span className="titlebar-title">dashboard-pessoal</span>
       </div>
 
       <button

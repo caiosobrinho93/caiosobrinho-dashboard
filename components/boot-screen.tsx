@@ -7,12 +7,7 @@ export function BootScreen() {
     <div className="boot" role="status" aria-live="polite">
       <div className="boot-window">
         <div className="boot-titlebar">
-          <div className="window-dots" aria-hidden="true">
-            <span className="window-dot red" />
-            <span className="window-dot yellow" />
-            <span className="window-dot green" />
-          </div>
-          <span>dashboard-pessoal — workspace local</span>
+          <span>dashboard-pessoal</span>
         </div>
         <div className="boot-code">
           <div>

@@ -39,6 +39,9 @@ const BUTTON_SIZE = 52;
 const BUBBLE_SIZE = 46;
 const STORAGE_KEY = "dashboard_mobile_bubble_pos";
 
+// Apple HIG: minimum 44pt touch target
+const MIN_TOUCH_TARGET = 44;
+
 type Position = { x: number; y: number };
 
 export function MobileBubbleMenu({
@@ -348,11 +351,11 @@ export function MobileBubbleMenu({
         })}
       </div>
 
-      {/* Botão flutuante principal (FAB arrastável) */}
+      {/* Botão flutuante principal (FAB arrastável) - Apple HIG: 44pt minimum touch target */}
       <button
         ref={buttonRef}
         type="button"
-        className={`mobile-bubble-fab${open ? " is-open" : ""}${isDragging ? " is-dragging" : ""}`}
+        className={`mobile-bubble-fab touch-target pressable${open ? " is-open" : ""}${isDragging ? " is-dragging" : ""}`}
         style={{
           transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
         }}

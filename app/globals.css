@@ -1,13 +1,91 @@
 /* =========================================================
-   Dashboard pessoal — tema "VS Code Dark Modern"
+   Dashboard pessoal — Apple HIG + VS Code Dark Modern
    ========================================================= */
 
 :root {
-  --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto,
-    "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "Cascadia Code", "Cascadia Mono", "SFMono-Regular", Consolas,
-    "Liberation Mono", Menlo, monospace;
+  /* ===== Apple HIG System Font Stack ===== */
+  --font-system: -apple-system, BlinkMacSystemFont, 'SF Pro Display',
+    'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', 'SFMono-Regular', Menlo, Monaco, Consolas,
+    'Liberation Mono', monospace;
+  --font-ui: var(--font-system);
 
+  /* ===== Apple HIG Typography Scale (8pt grid) ===== */
+  --text-caption2: 11px;   /* Caption 2 */
+  --text-caption1: 12px;   /* Caption 1 */
+  --text-footnote: 13px;   /* Footnote */
+  --text-subhead: 15px;    /* Subheadline */
+  --text-body: 17px;       /* Body - Default */
+  --text-headline: 17px;   /* Headline (semibold) */
+  --text-title3: 20px;     /* Title 3 */
+  --text-title2: 22px;     /* Title 2 */
+  --text-title1: 28px;     /* Title 1 */
+  --text-large-title: 34px; /* Large Title */
+
+  /* ===== Apple HIG 8pt Spacing Grid ===== */
+  --space-1: 4px;   /* Extra small */
+  --space-2: 8px;   /* Small */
+  --space-3: 12px;  /* Medium-small */
+  --space-4: 16px;  /* Medium */
+  --space-5: 20px;  /* Medium-large */
+  --space-6: 24px;  /* Large */
+  --space-8: 32px;  /* Extra large */
+  --space-10: 40px; /* 2X large */
+  --space-12: 48px; /* 3X large */
+
+  /* ===== Apple HIG Border Radius (Concentric) ===== */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px; /* Capsule */
+
+  /* ===== Apple HIG Animation Easing ===== */
+  --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ===== Apple HIG Animation Durations ===== */
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* ===== Apple System Colors (Light Mode Defaults) ===== */
+  --system-blue: #007AFF;
+  --system-green: #34C759;
+  --system-indigo: #5856D6;
+  --system-orange: #FF9500;
+  --system-pink: #FF2D55;
+  --system-purple: #AF52DE;
+  --system-red: #FF3B30;
+  --system-teal: #5AC8FA;
+  --system-yellow: #FFCC00;
+
+  --system-gray: #8E8E93;
+  --system-gray2: #AEAEB2;
+  --system-gray3: #C7C7CC;
+  --system-gray4: #D1D1D6;
+  --system-gray5: #E5E5EA;
+  --system-gray6: #F2F2F7;
+
+  /* Semantic Colors - Light */
+  --label-primary: #000000;
+  --label-secondary: rgba(60, 60, 67, 0.6);
+  --label-tertiary: rgba(60, 60, 67, 0.3);
+  --label-quaternary: rgba(60, 60, 67, 0.18);
+
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F2F2F7;
+  --bg-tertiary: #FFFFFF;
+
+  --separator: rgba(60, 60, 67, 0.29);
+  --separator-opaque: #C6C6C8;
+
+  /* ===== VS Code Dark Modern Theme (Base) ===== */
   --bg: #1e1e1e;
   --bg-deep: #181818;
   --bg-panel: #252526;
@@ -35,17 +113,53 @@
   --red: #f48771;
   --pink: #f28ba8;
 
-  --radius: 6px;
-  --radius-sm: 4px;
-  --radius-lg: 10px;
+  /* Use Apple concentric radius for components */
+  --radius: 12px;       /* Matches --radius-md */
+  --radius-sm: 8px;     /* Matches --radius-sm */
+  --radius-lg: 16px;    /* Matches --radius-lg */
 
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.25);
 
+  /* Safe area insets */
   --safe-top: max(env(safe-area-inset-top, 0px), var(--safe-area-inset-top, 0px));
   --safe-right: max(env(safe-area-inset-right, 0px), var(--safe-area-inset-right, 0px));
   --safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px));
   --safe-left: max(env(safe-area-inset-left, 0px), var(--safe-area-inset-left, 0px));
+}
+
+/* ===== Dark Mode Overrides (Apple System Colors) ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --system-blue: #0A84FF;
+    --system-green: #30D158;
+    --system-indigo: #5E5CE6;
+    --system-orange: #FF9F0A;
+    --system-pink: #FF375F;
+    --system-purple: #BF5AF2;
+    --system-red: #FF453A;
+    --system-teal: #64D2FF;
+    --system-yellow: #FFD60A;
+
+    --system-gray: #8E8E93;
+    --system-gray2: #636366;
+    --system-gray3: #48484A;
+    --system-gray4: #3A3A3C;
+    --system-gray5: #2C2C2E;
+    --system-gray6: #1C1C1E;
+
+    --label-primary: #FFFFFF;
+    --label-secondary: rgba(235, 235, 245, 0.6);
+    --label-tertiary: rgba(235, 235, 245, 0.3);
+    --label-quaternary: rgba(235, 235, 245, 0.18);
+
+    --bg-primary: #000000;
+    --bg-secondary: #1C1C1E;
+    --bg-tertiary: #2C2C2E;
+
+    --separator: rgba(84, 84, 88, 0.6);
+    --separator-opaque: #38383A;
+  }
 }
 
 :root,
@@ -223,6 +337,179 @@ a:focus:not(:focus-visible) {
 
 .skip-link:focus {
   top: 10px;
+}
+
+/* ===== Apple HIG Component Utility Classes ===== */
+
+/* Typography utilities */
+.text-caption2 { font-size: var(--text-caption2); line-height: 1.3; }
+.text-caption1 { font-size: var(--text-caption1); line-height: 1.3; }
+.text-footnote { font-size: var(--text-footnote); line-height: 1.4; }
+.text-subhead { font-size: var(--text-subhead); line-height: 1.4; font-weight: 400; }
+.text-body { font-size: var(--text-body); line-height: 1.5; }
+.text-headline { font-size: var(--text-headline); line-height: 1.4; font-weight: 600; }
+.text-title3 { font-size: var(--text-title3); line-height: 1.3; font-weight: 600; }
+.text-title2 { font-size: var(--text-title2); line-height: 1.3; font-weight: 600; }
+.text-title1 { font-size: var(--text-title1); line-height: 1.2; font-weight: 600; }
+.text-large-title { font-size: var(--text-large-title); line-height: 1.1; font-weight: 700; }
+
+/* Apple HIG Button Patterns */
+.btn-hig {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px; /* Apple HIG minimum touch target */
+  padding: 0 var(--space-4);
+  font-size: var(--text-body);
+  font-weight: 500;
+  border-radius: var(--radius-full); /* Capsule shape for primary actions */
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out),
+              transform var(--duration-instant) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+
+.btn-hig:active {
+  transform: scale(0.97);
+}
+
+.btn-hig:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.3);
+}
+
+/* Primary Button - Filled capsule */
+.btn-hig-primary {
+  background: var(--system-blue);
+  color: #fff;
+}
+.btn-hig-primary:hover {
+  background: #0066cc;
+}
+
+/* Secondary Button - Outlined/Subtle */
+.btn-hig-secondary {
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--system-blue);
+  border: 1px solid transparent;
+}
+.btn-hig-secondary:hover {
+  background: rgba(0, 122, 255, 0.2);
+}
+
+/* Tertiary Button - Text only */
+.btn-hig-tertiary {
+  background: transparent;
+  color: var(--system-blue);
+  padding: 0 var(--space-2);
+}
+.btn-hig-tertiary:hover {
+  background: rgba(0, 122, 255, 0.1);
+  border-radius: var(--radius-md);
+}
+
+/* Destructive Button */
+.btn-hig-destructive {
+  background: var(--system-red);
+  color: #fff;
+}
+.btn-hig-destructive:hover {
+  background: #cc2e25;
+}
+
+/* Button Sizes */
+.btn-hig-sm { min-height: 36px; padding: 0 var(--space-3); font-size: var(--text-footnote); }
+.btn-hig-lg { min-height: 50px; padding: 0 var(--space-6); font-size: var(--text-title3); }
+
+/* Apple HIG Input Fields */
+.input-hig {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-body);
+  font-family: var(--font-ui);
+  color: var(--label-primary);
+  background: var(--bg-tertiary);
+  border: 1px solid var(--separator);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out);
+}
+.input-hig:focus {
+  outline: none;
+  border-color: var(--system-blue);
+  box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.3);
+}
+.input-hig::placeholder {
+  color: var(--label-tertiary);
+}
+
+/* Apple HIG Card Pattern */
+.card-hig {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--separator);
+  box-shadow: var(--shadow-soft);
+}
+
+/* Grouped card style (iOS style) */
+.card-grouped {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--separator);
+}
+.card-grouped .card-item {
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--separator);
+  padding: var(--space-4);
+}
+.card-grouped .card-item:first-child { border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.card-grouped .card-item:last-child { border-radius: 0 0 var(--radius-lg) var(--radius-lg); border-bottom: none; }
+
+/* Touch target helper - ensures 44x44pt minimum */
+.touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Press feedback animation */
+.pressable {
+  transition: transform var(--duration-instant) var(--ease-out);
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* Apple HIG Animation Classes */
+.fade-in { animation: fadeIn var(--duration-normal) var(--ease-out); }
+.slide-up { animation: slideUp var(--duration-normal) var(--ease-out); }
+.scale-in { animation: scaleIn var(--duration-normal) var(--ease-spring); }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* =========================================================
@@ -451,12 +738,18 @@ a:focus:not(:focus-visible) {
   border-left: 2px solid transparent;
   background: transparent;
   color: #7d7d7d;
-  transition: color 120ms ease, background 120ms ease;
+  transition: color 120ms var(--ease-out), background 120ms var(--ease-out);
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .activity-item:hover {
   color: var(--text-strong);
   background: #232323;
+}
+
+.activity-item:active {
+  transform: scale(0.97);
 }
 
 .activity-item.active {
@@ -529,7 +822,9 @@ a:focus:not(:focus-visible) {
   color: #909090;
   font-size: 10.5px;
   letter-spacing: 0.01em;
-  transition: color 120ms ease, transform 120ms ease;
+  transition: color 120ms var(--ease-out), transform 120ms var(--ease-out);
+  min-height: 44px;
+  min-width: 44px;
 }
 
 .mobile-nav-item svg {
@@ -538,6 +833,10 @@ a:focus:not(:focus-visible) {
 
 .mobile-nav-item.active {
   color: var(--accent);
+}
+
+.mobile-nav-item:active {
+  transform: scale(0.97);
 }
 
 .mobile-nav-item.active::before {
@@ -549,11 +848,11 @@ a:focus:not(:focus-visible) {
   width: 26px;
   height: 2px;
   background: var(--accent);
-  animation: nav-line-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+  animation: nav-line-in 240ms var(--ease-out) backwards;
 }
 
 .mobile-nav-item.active svg {
-  animation: nav-pop 280ms cubic-bezier(0.2, 0.9, 0.2, 1) backwards;
+  animation: nav-pop 280ms var(--ease-spring) backwards;
 }
 
 .mobile-nav-badge {
@@ -5440,7 +5739,7 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-backdrop-filter: blur(5px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity var(--duration-normal) var(--ease-out);
 }
 
 .mobile-bubble-backdrop.active {
@@ -5482,7 +5781,7 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translate3d(-50%, -50%, 0) scale(0.05);
   opacity: 0;
   pointer-events: none;
-  transition: transform 220ms ease, opacity 180ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  transition: transform 220ms var(--ease-out), opacity 180ms var(--ease-out), border-color 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
   will-change: transform, opacity;
 }
 
@@ -5490,14 +5789,14 @@ input[type="number"]::-webkit-inner-spin-button {
   transform: translate3d(calc(-50% + var(--target-x)), calc(-50% + var(--target-y)), 0) scale(1);
   opacity: 1;
   pointer-events: auto;
-  transition: transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms),
-              opacity 220ms ease var(--delay, 0ms),
-              border-color 150ms ease,
-              box-shadow 150ms ease;
+  transition: transform 340ms var(--ease-spring) var(--delay, 0ms),
+              opacity 220ms var(--ease-out) var(--delay, 0ms),
+              border-color 150ms var(--ease-out),
+              box-shadow 150ms var(--ease-out);
 }
 
 .mobile-bubble-item:active {
-  transform: translate3d(calc(-50% + var(--target-x)), calc(-50% + var(--target-y)), 0) scale(1.15) !important;
+  transform: translate3d(calc(-50% + var(--target-x)), calc(-50% + var(--target-y)), 0) scale(0.97) !important;
   border-color: var(--item-color, var(--accent)) !important;
   box-shadow: 0 0 18px var(--item-color, var(--accent)) !important;
 }
@@ -5582,7 +5881,12 @@ input[type="number"]::-webkit-inner-spin-button {
   will-change: transform;
 }
 
-.mobile-bubble-fab:active,
+.mobile-bubble-fab:active {
+  transform: scale(0.97);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.7), 0 0 24px var(--accent-soft);
+  filter: brightness(1.1);
+}
+
 .mobile-bubble-fab.is-dragging {
   cursor: grabbing;
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.7), 0 0 24px var(--accent-soft);
