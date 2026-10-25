@@ -8,11 +8,15 @@ import {
   GitBranch,
   Search,
   Settings,
+  TriangleAlert,
+  UserRound,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useAuth } from "@/components/auth-provider";
 import { BootScreen, useIntroDelay } from "@/components/boot-screen";
+import { CloudOverlay } from "@/components/cloud/cloud-overlay";
 import { CommandPalette } from "@/components/command-palette";
 import {
   isActivePath,
@@ -34,7 +38,13 @@ const TITLES: Record<string, string> = {
   "/notas": "Notas",
   "/mais": "Mais",
   "/configuracoes": "Configurações",
+  "/entrar": "Entrar",
+  "/criar-conta": "Criar conta",
+  "/recuperar-senha": "Recuperar senha",
+  "/redefinir-senha": "Redefinir senha",
 };
+
+const AUTH_PATHS = ["/entrar", "/criar-conta", "/recuperar-senha", "/redefinir-senha"];
 
 function formatCount(count: number): string {
   return count > 9 ? "9+" : String(count);
@@ -58,7 +68,6 @@ function TitleBar({ onOpenPalette }: { onOpenPalette: () => void }) {
         type="button"
         className="titlebar-command"
         onClick={onOpenPalette}
-        aria-label="Buscar ou executar comando"
       >
         <Search size={12} />
         <span className="command-text">Buscar ou executar comando...</span>
@@ -111,12 +120,16 @@ function ActivityBar({
             key={item.href}
             href={item.href}
             className={`activity-item${active ? " active" : ""}`}
-            aria-label={item.label}
+            aria-label={badge > 0 ? `${item.label}, ${badge} em aberto` : item.label}
             aria-current={active ? "page" : undefined}
             title={item.label}
           >
             <Icon size={19} strokeWidth={1.8} />
-            {badge > 0 ? <span className="activity-badge">{formatCount(badge)}</span> : null}
+            {badge > 0 ? (
+              <span className="activity-badge" aria-hidden="true">
+                {formatCount(badge)}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -163,11 +176,16 @@ function MobileNav({
             key={item.href}
             href={item.href}
             className={`mobile-nav-item${active ? " active" : ""}`}
+            aria-label={badge > 0 ? `${item.label}, ${badge} em aberto` : item.label}
             aria-current={active ? "page" : undefined}
           >
             <Icon size={20} strokeWidth={active ? 2 : 1.7} />
             <span>{item.label}</span>
-            {badge > 0 ? <span className="mobile-nav-badge">{formatCount(badge)}</span> : null}
+            {badge > 0 ? (
+              <span className="mobile-nav-badge" aria-hidden="true">
+                {formatCount(badge)}
+              </span>
+            ) : null}
           </Link>
         );
       })}
@@ -195,6 +213,49 @@ function Clock() {
 }
 
 function StatusBar() {
+  const { cloudConfigured, cloudPhase, syncState, syncError, pendingCount, lastSyncedAt } =
+    useStore();
+  const { user } = useAuth();
+
+  let label = "Local";
+  let detail = "Dados salvos neste dispositivo";
+  let tone = "";
+
+  if (!cloudConfigured) {
+    label = "Nuvem não configurada";
+    detail = "Preencha as variáveis públicas do Supabase para ativar a sincronização.";
+    tone = "warning";
+  } else if (cloudPhase === "choice") {
+    label = "Configurar nuvem";
+    detail = "Escolha como combinar os dados deste dispositivo com a conta.";
+    tone = "warning";
+  } else if (syncState === "connecting") {
+    label = "Conectando à nuvem";
+    detail = "Verificando sua conta e carregando os dados.";
+  } else if (!user) {
+    label = "Local";
+    detail = "Entre na sua conta para sincronizar entre dispositivos.";
+  } else if (syncState === "syncing") {
+    label = pendingCount > 0 ? `Sincronizando (${pendingCount})` : "Sincronizando";
+    detail = "Enviando alterações para a nuvem.";
+  } else if (syncState === "offline") {
+    label = pendingCount > 0 ? `Offline (${pendingCount})` : "Offline";
+    detail = "As alterações ficam neste dispositivo até a conexão voltar.";
+    tone = "warning";
+  } else if (syncState === "error") {
+    label = "Erro de sincronização";
+    detail = syncError ?? "Abra Configurações para tentar novamente.";
+    tone = "danger";
+  } else if (syncState === "synced") {
+    label = "Nuvem sincronizada";
+    detail = lastSyncedAt
+      ? `Última sincronização às ${new Intl.DateTimeFormat("pt-BR", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }).format(new Date(lastSyncedAt))}.`
+      : "Seus dados estão atualizados.";
+  }
+
   return (
     <footer className="status-bar" aria-label="Status do workspace">
       <div className="status-group">
@@ -205,14 +266,15 @@ function StatusBar() {
         <span className="status-item" title="Nenhum problema encontrado">
           <CircleCheck size={11} />0 problemas
         </span>
-        <span className="status-item">
-          <Cloud size={11} />
-          Supabase: fase 2
+        <span className={`status-item status-cloud ${tone}`} title={detail}>
+          {tone === "danger" ? <TriangleAlert size={11} /> : <Cloud size={11} />}
+          {label}
         </span>
       </div>
       <div className="status-group">
-        <span className="status-item" title="Dados salvos no navegador">
-          local
+        <span className="status-item" title={user ? "Dados sincronizados na nuvem" : "Dados salvos no navegador"}>
+          {user ? <UserRound size={11} /> : null}
+          {user ? "nuvem" : "local"}
         </span>
         <span className="status-item">UTF-8</span>
         <span className="status-item">TypeScript</span>
@@ -228,14 +290,16 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { data, hydrated } = useStore();
-  const introReady = useIntroDelay(280);
+  const { loading: authLoading } = useAuth();
+  const normalizedPath =
+    pathname !== "/" ? pathname.replace(/\/+$/, "") : pathname;
+  const isAuthRoute = AUTH_PATHS.includes(normalizedPath);
+  const introReady = useIntroDelay(isAuthRoute ? 0 : 280);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
 
   const pendingTasks = data.tasks.filter((task) => !task.done).length;
   const pendingShopping = data.shopping.filter((item) => !item.done).length;
-  const normalizedPath =
-    pathname !== "/" ? pathname.replace(/\/+$/, "") : pathname;
   const pageTitle = TITLES[normalizedPath] ?? "Dashboard";
 
   useEffect(() => {
@@ -301,8 +365,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
   }, [pathname, router]);
 
-  if (!hydrated || !introReady) {
+  if (!hydrated || authLoading || !introReady) {
     return <BootScreen />;
+  }
+
+  if (isAuthRoute) {
+    return <div className="auth-app">{children}</div>;
   }
 
   return (
@@ -331,6 +399,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         pendingShopping={pendingShopping}
       />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <CloudOverlay />
     </div>
   );
 }

@@ -5,19 +5,32 @@ import {
   Cloud,
   Database,
   HardDrive,
+  LoaderCircle,
+  LogIn,
   Settings,
+  ShieldCheck,
   StickyNote,
   Target,
+  UserRound,
   Video,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
+import { useAuth } from "@/components/auth-provider";
 import { Panel } from "@/components/ui/panel";
 import { useStore } from "@/lib/store";
 import { formatBytes, percent, sum } from "@/lib/utils";
 
 export function MaisPage() {
-  const { data } = useStore();
+  const {
+    data,
+    cloudConfigured,
+    syncState,
+    syncError,
+    pendingCount,
+    online,
+  } = useStore();
+  const { user } = useAuth();
 
   const videos = data.media.filter((item) => item.kind === "video").length;
   const musics = data.media.filter((item) => item.kind === "musica").length;
@@ -43,6 +56,24 @@ export function MaisPage() {
     [data],
   );
 
+  const syncLabel = !cloudConfigured
+    ? "Nuvem não configurada"
+    : !user
+      ? "Modo local"
+      : syncState === "connecting"
+        ? "Conectando"
+        : syncState === "syncing"
+          ? pendingCount > 0
+            ? `Sincronizando (${pendingCount})`
+            : "Sincronizando"
+          : syncState === "offline"
+            ? pendingCount > 0
+              ? `Offline (${pendingCount})`
+              : "Offline"
+            : syncState === "error"
+              ? "Erro de sincronização"
+              : "Nuvem sincronizada";
+
   return (
     <div className="page">
       <div className="page-header">
@@ -56,8 +87,7 @@ export function MaisPage() {
           </div>
           <h1 className="page-title">Mais</h1>
           <p className="page-subtitle">
-            Atalhos para o que não cabe na barra inferior, preferências e o estado do seu
-            workspace local.
+            Atalhos, preferências e o estado do seu workspace.
           </p>
         </div>
       </div>
@@ -95,7 +125,7 @@ export function MaisPage() {
           </span>
           <span className="hub-card-meta">
             {data.goals.length} meta{data.goals.length === 1 ? "" : "s"} · {completedGoals}{" "}
-            concluída{completedGoals === 1 ? "" : "s"} · {goalsAverage}% médio
+            concluída{completedGoals === 1 ? "" : "s"} · {goalsAverage}% de média
           </span>
         </Link>
 
@@ -130,7 +160,7 @@ export function MaisPage() {
             <ArrowUpRight size={12} className="hub-arrow" />
           </span>
           <span className="hub-card-meta">
-            Nome, orçamento, cor de destaque, backup e dados
+            Conta, preferências, backup e sincronização
           </span>
         </Link>
       </div>
@@ -139,7 +169,7 @@ export function MaisPage() {
         <div className="panel-body">
           <div className="system-row">
             <span className="system-row-label">
-              <span className="status-dot online" aria-hidden="true" />
+              <span className={`status-dot ${online ? "online" : "offline"}`} aria-hidden="true" />
               Armazenamento local
             </span>
             <span className="system-row-value">{formatBytes(storageBytes)}</span>
@@ -160,30 +190,101 @@ export function MaisPage() {
           </div>
           <div className="system-row">
             <span className="system-row-label">
-              <Cloud size={13} />
+              <UserRound size={13} />
+              Conta
+            </span>
+            <span className="system-row-value">{user?.email ?? "Modo local"}</span>
+          </div>
+          <div className="system-row">
+            <span className="system-row-label">
+              {syncState === "syncing" || syncState === "connecting" ? (
+                <LoaderCircle className="spin" size={13} />
+              ) : (
+                <Cloud size={13} />
+              )}
               Sincronização
             </span>
-            <span className="system-row-value" style={{ color: "var(--yellow)" }}>
-              Supabase · fase 2
+            <span
+              className="system-row-value"
+              style={{
+                color:
+                  syncState === "error"
+                    ? "var(--red)"
+                    : syncState === "offline"
+                      ? "var(--yellow)"
+                      : syncState === "synced"
+                        ? "var(--green)"
+                        : "var(--text-dim)",
+              }}
+            >
+              {syncLabel}
             </span>
           </div>
+          {pendingCount > 0 ? (
+            <div className="system-row">
+              <span className="system-row-label">
+                <Cloud size={13} />
+                Fila offline
+              </span>
+              <span className="system-row-value">{pendingCount} alteração(ões)</span>
+            </div>
+          ) : null}
         </div>
       </Panel>
 
-      <Panel title="Próxima fase" dotColor="var(--accent)">
+      <Panel title="Conta e nuvem" dotColor="var(--accent)">
         <div className="panel-body" style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div className="backend-status">
-            <span className="badge badge-warning">
-              <Cloud size={10} /> planejado
-            </span>
-            <span className="badge">Supabase</span>
-            <span className="badge">Vercel</span>
-            <span className="badge">Auth</span>
-          </div>
-          <p className="settings-hint">
-            Hoje tudo fica salvo apenas neste navegador. A próxima fase adiciona login,
-            sincronização entre dispositivos e backup na nuvem sem mudar a experiência do painel.
-          </p>
+          {!cloudConfigured ? (
+            <>
+              <div className="backend-status">
+                <span className="badge badge-warning">
+                  <Cloud size={10} /> modo local
+                </span>
+              </div>
+              <p className="settings-hint">
+                Este build não tem as variáveis públicas do Supabase. O dashboard continua
+                funcionando localmente. Configure <code>NEXT_PUBLIC_SUPABASE_URL</code> e{" "}
+                <code>NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code> para ativar a conta.
+              </p>
+            </>
+          ) : user ? (
+            <>
+              <div className="backend-status">
+                <span className="badge badge-success">
+                  <ShieldCheck size={10} /> conta conectada
+                </span>
+                <span className={syncState === "synced" ? "badge badge-success" : "badge"}>
+                  {syncLabel}
+                </span>
+              </div>
+              <p className="settings-hint">
+                {syncError
+                  ? syncError
+                  : "Os dados são sincronizados automaticamente e também ficam em cache neste dispositivo para uso offline."}
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="backend-status">
+                <span className="badge badge-warning">
+                  <HardDrive size={10} /> dados só neste navegador
+                </span>
+              </div>
+              <p className="settings-hint">
+                Crie uma conta para acessar as mesmas tarefas, compras e finanças em outros
+                dispositivos. O modo local continua funcionando se você sair.
+              </p>
+              <div className="data-actions">
+                <Link href="/entrar" className="btn btn-primary">
+                  <LogIn size={13} />
+                  Entrar
+                </Link>
+                <Link href="/criar-conta" className="btn btn-secondary">
+                  Criar conta
+                </Link>
+              </div>
+            </>
+          )}
           <Link href="/configuracoes" className="link-btn">
             Ver detalhes em Configurações <ArrowUpRight size={11} />
           </Link>

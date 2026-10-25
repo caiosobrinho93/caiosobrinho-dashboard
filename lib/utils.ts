@@ -4,11 +4,72 @@ export function cx(...classes: (string | false | null | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
+const UUID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function randomBytes(length: number): Uint8Array {
+  const bytes = new Uint8Array(length);
+  if (typeof crypto !== "undefined" && typeof crypto.getRandomValues === "function") {
+    crypto.getRandomValues(bytes);
+    return bytes;
+  }
+  for (let index = 0; index < length; index += 1) {
+    bytes[index] = Math.floor(Math.random() * 256);
+  }
+  return bytes;
+}
+
+function bytesToUuid(bytes: Uint8Array): string {
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 export function uid(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
   }
-  return `id-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return bytesToUuid(randomBytes(16));
+}
+
+function hash32(input: string, seed: number): number {
+  let hash = (0x811c9dc5 ^ seed) >>> 0;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return hash >>> 0;
+}
+
+/**
+ * Converte IDs antigos (`seed-task-1`, `id-...`) em UUIDs determinísticos.
+ * O Supabase usa `uuid` como chave primária; o mesmo ID antigo sempre gera o
+ * mesmo UUID, então atualizações e exclusões continuam apontando para a linha certa.
+ */
+export function stableUuid(value: string): string {
+  const trimmed = value.trim();
+  if (UUID_PATTERN.test(trimmed)) return trimmed.toLowerCase();
+
+  const first = hash32(trimmed, 0x9e3779b9).toString(16).padStart(8, "0");
+  const second = hash32(trimmed, 0x85ebca6b).toString(16).padStart(8, "0");
+  const third = hash32(trimmed, 0xc2b2ae35).toString(16).padStart(8, "0");
+  const fourth = hash32(trimmed, 0x27d4eb2f).toString(16).padStart(8, "0");
+  const variant = ((parseInt(fourth.slice(0, 2), 16) & 0x3f) | 0x80)
+    .toString(16)
+    .padStart(2, "0");
+
+  return [
+    first,
+    second.slice(0, 4),
+    `4${second.slice(4, 7)}`,
+    `${variant}${third.slice(0, 2)}`,
+    `${third.slice(2, 6)}${fourth.slice(2, 10)}`,
+  ].join("-");
+}
+
+export function isUuid(value: string): boolean {
+  return UUID_PATTERN.test(value);
 }
 
 export function sum(values: number[]): number {

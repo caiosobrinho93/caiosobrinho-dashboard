@@ -12,7 +12,10 @@ O shell nativo cuida de:
 - haptics em ações de toque;
 - redimensionamento do WebView quando o teclado abre.
 
-Os dados continuam no `localStorage` do WebView. Não há servidor nem login nesta fase.
+O app funciona sem conta, com os dados no `localStorage` do WebView. Se o build incluir as variáveis
+públicas do Supabase, também é possível entrar, manter um cache por conta e sincronizar tarefas,
+compras, finanças, mídia, metas e notas entre dispositivos. A fila offline e o onboarding são os
+mesmos da versão web.
 
 ## Identidade
 
@@ -24,6 +27,42 @@ Os dados continuam no `localStorage` do WebView. Não há servidor nem login nes
 | compileSdk / targetSdk | 36 |
 | Gradle | 8.14.3 |
 | Android Gradle Plugin | 8.13.0 |
+
+## Conta e sincronização
+
+O APK compila o mesmo build estático da web. Para habilitar login e nuvem, defina as variáveis
+públicas **antes** de rodar `npm run android:sync`/`npm run android:apk`:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+NEXT_PUBLIC_APP_URL=https://seu-dominio-publico.com
+```
+
+Sem essas variáveis, o APK inicia em modo local e não mostra o fluxo de conta. A publishable/anon key
+é pública por design; nunca use `service_role` no APK.
+
+### Links de confirmação e recuperação
+
+O WebView roda em `https://localhost`. Esse endereço não é acessível pelo navegador externo, então
+os links de e-mail precisam apontar para uma URL pública:
+
+1. Publique a versão web (Vercel ou outro host estático).
+2. Configure `NEXT_PUBLIC_APP_URL` com essa URL no build do APK.
+3. No Supabase, use a mesma URL como **Site URL** e cadastre as Redirect URLs:
+   `https://seu-dominio/entrar/` e `https://seu-dominio/redefinir-senha/`.
+
+Sem uma URL pública, o Supabase pode usar a Site URL do projeto e abrir o link no navegador. O
+WebView não compartilha automaticamente a sessão criada no navegador externo; o retorno automático
+ao app depende de deep links nativos, que **não estão configurados** nesta versão. Para validar o
+fluxo completo no Android, publique a web primeiro.
+
+### Dados no aparelho
+
+- Convidado: `dashboard-pessoal.v1`.
+- Conta: cache, metadados e fila com prefixos `dashboard-pessoal.cloud.*`.
+- Sair remove o cache e a fila daquela conta, mas mantém os dados de convidado.
+- Desinstalar o app apaga todo o `localStorage`; exporte um JSON ou use a nuvem antes.
 
 ## Pré-requisitos
 
@@ -166,6 +205,16 @@ O workflow fica em `.github/workflows/android-debug.yml`. Ele roda:
 O job instala Node 22, JDK 21 e Android SDK, roda o build estático, sincroniza o Capacitor e
 executa `./gradlew assembleDebug`. O APK fica no artifact **dashboard-pessoal-debug**.
 
+Para gerar um APK com conta e sincronização, cadastre em **Settings → Secrets and variables →
+Actions → Variables** do repositório:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_SUPABASE_ANON_KEY`)
+- `NEXT_PUBLIC_APP_URL`
+
+O workflow injeta esses valores no `npm run build`. Se as variáveis não existirem, o APK é gerado
+em modo local, sem login.
+
 Para usar o workflow, o projeto precisa estar em um repositório GitHub com Actions habilitado.
 O APK gerado é de **debug**, não assinado para publicação, e deve ser instalado com "instalar de
 fontes desconhecidas" liberado no aparelho (ou via `adb install`).
@@ -267,11 +316,12 @@ repositório e decodifique o keystore em um passo anterior ao Gradle. Nunca colo
 
 - **Nativo:** janela, splash, ícones, status/navigation bars, insets de safe area, teclado,
   vibração e botão físico de voltar.
-- **Web:** todas as telas, formulários, gráficos, command palette, animações e persistência em
-  `localStorage`.
+- **Web:** todas as telas, formulários, gráficos, autenticação, sincronização, command palette,
+  animações e persistência em `localStorage`.
 - **Rede:** o app abre sem internet; as miniaturas do YouTube só carregam quando houver conexão.
-- **Backup:** os dados ficam no armazenamento do WebView. Desinstalar o app apaga tudo. Exporte
-  o JSON em **Configurações → Dados e backup** antes de trocar de aparelho ou limpar os dados.
+  Com uma conta, alterações offline ficam na fila local e sincronizam quando a conexão volta.
+- **Backup:** os dados ficam no armazenamento do WebView. Desinstalar o app apaga os dados locais.
+  Exporte o JSON em **Configurações → Dados e backup** ou use a nuvem antes de trocar de aparelho.
 
 O botão físico de voltar segue esta ordem: fecha a command palette, fecha modal/confirmação,
 volta uma rota e, no início, sai do app.
@@ -283,5 +333,8 @@ volta uma rota e, no início, sai do app.
 - O app foi configurado para Android 7.0+; recomenda-se Android 10+ e WebView atualizado.
 - O workflow e o build local não assinam o APK de debug.
 - O projeto não usa deep links externos nesta fase. As rotas são internas ao app.
+- Links de confirmação/recuperação abrem na web ou no navegador externo. O retorno automático ao
+  app com sessão compartilhada ainda não está implementado; publique a web e valide o fluxo no
+  aparelho antes de considerar o login Android concluído.
 - Se o Gradle reclamar de versão de Java, confirme `java -version` e `JAVA_HOME`; o projeto
   espera JDK 21.

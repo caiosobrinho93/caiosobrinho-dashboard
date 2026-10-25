@@ -3,14 +3,18 @@
 import {
   ArrowDown,
   ArrowUp,
+  Cloud,
   CornerDownLeft,
   Download,
+  LogIn,
   Plus,
+  RefreshCw,
   Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
+import { useAuth } from "@/components/auth-provider";
 import { NAV_ITEMS, SETTINGS_ITEM } from "@/components/nav";
 import { useStore } from "@/lib/store";
 import { downloadTextFile } from "@/lib/utils";
@@ -40,7 +44,8 @@ export function CommandPalette({
   onClose: () => void;
 }) {
   const router = useRouter();
-  const { data } = useStore();
+  const { data, syncNow, pendingCount } = useStore();
+  const { user } = useAuth();
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -116,6 +121,30 @@ export function CommandPalette({
 
     const system: PaletteItem[] = [
       {
+        id: "account",
+        label: user ? "Conta e sincronização" : "Entrar na conta",
+        group: "Sistema",
+        hint: user ? "configurações" : "nuvem",
+        icon: user ? Cloud : LogIn,
+        href: user ? "/configuracoes" : "/entrar",
+        keywords: "login conta supabase nuvem sincronizar",
+      },
+      ...(user
+        ? [
+            {
+              id: "sync",
+              label: pendingCount > 0 ? `Sincronizar agora (${pendingCount})` : "Sincronizar agora",
+              group: "Sistema",
+              hint: "nuvem",
+              icon: RefreshCw,
+              action: () => {
+                void syncNow();
+              },
+              keywords: "atualizar enviar baixar nuvem",
+            } satisfies PaletteItem,
+          ]
+        : []),
+      {
         id: "export",
         label: "Exportar backup (.json)",
         group: "Sistema",
@@ -133,7 +162,7 @@ export function CommandPalette({
     ];
 
     return [...navigation, ...create, ...system];
-  }, [data]);
+  }, [data, pendingCount, syncNow, user]);
 
   const filtered = useMemo(() => {
     const term = normalize(query.trim());
@@ -198,7 +227,7 @@ export function CommandPalette({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div className="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+      <div className="palette" role="dialog" aria-modal="true" aria-label="Paleta de comandos">
         <div className="palette-input-row">
           <Search size={15} />
           <input

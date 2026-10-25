@@ -9,7 +9,7 @@ import type {
   Transaction,
   Goal,
 } from "./types";
-import { todayISO, toISODate, uid } from "./utils";
+import { stableUuid, todayISO, toISODate, uid } from "./utils";
 
 type RecordLike = Record<string, unknown>;
 
@@ -43,13 +43,18 @@ function isOneOf<T extends string>(value: unknown, options: readonly T[]): value
   return typeof value === "string" && (options as readonly string[]).includes(value);
 }
 
+function normalizeId(value: unknown): string {
+  const id = text(value).trim();
+  return id ? stableUuid(id) : uid();
+}
+
 function normalizeTask(raw: unknown): Task | null {
   if (!isRecord(raw)) return null;
   const title = text(raw.title).trim();
   if (!title) return null;
   const today = todayISO();
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     title,
     notes: text(raw.notes),
     priority: isOneOf(raw.priority, ["baixa", "media", "alta"] as const) ? raw.priority : "media",
@@ -68,7 +73,7 @@ function normalizeShoppingItem(raw: unknown): ShoppingItem | null {
   const category = isOneOf(raw.category, SHOPPING_CATEGORIES) ? raw.category : "Outros";
   const price = raw.price === null || raw.price === "" ? null : Math.max(0, number(raw.price));
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     name,
     quantity: Math.max(0.01, number(raw.quantity, 1)),
     unit: isOneOf(raw.unit, ["un", "kg", "g", "L", "ml", "cx", "pct"] as const) ? raw.unit : "un",
@@ -85,7 +90,7 @@ function normalizeTransaction(raw: unknown): Transaction | null {
   if (!description) return null;
   const type = raw.type === "receita" ? "receita" : "despesa";
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     description,
     amount: Math.max(0, number(raw.amount)),
     type,
@@ -101,7 +106,7 @@ function normalizeMedia(raw: unknown): MediaLink | null {
   const url = text(raw.url).trim();
   if (!title || !url) return null;
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     title,
     url,
     kind: raw.kind === "musica" ? "musica" : "video",
@@ -120,7 +125,7 @@ function normalizeGoal(raw: unknown): Goal | null {
   const title = text(raw.title).trim();
   if (!title) return null;
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     title,
     target: Math.max(1, number(raw.target, 100)),
     current: Math.max(0, number(raw.current)),
@@ -137,7 +142,7 @@ function normalizeNote(raw: unknown): Note | null {
   if (!title) return null;
   const createdAt = timestamp(raw.createdAt, new Date().toISOString());
   return {
-    id: text(raw.id, uid()),
+    id: normalizeId(raw.id),
     title,
     body: text(raw.body),
     color: text(raw.color, "#dcdcaa"),

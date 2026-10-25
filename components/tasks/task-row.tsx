@@ -32,8 +32,8 @@ export function TaskRow({ task, onToggle, onEdit, showChevron = false }: TaskRow
         type="button"
         className="task-content"
         onClick={() => onEdit(task)}
-        aria-label={`Editar tarefa: ${task.title}`}
       >
+        <span className="sr-only">Editar tarefa</span>
         <span className="task-title">{task.title}</span>
         <span className="task-meta">
           <span className="task-meta-item" title={`Prioridade ${priority.label.toLowerCase()}`}>

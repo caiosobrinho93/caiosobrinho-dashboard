@@ -3,8 +3,9 @@
 Painel pessoal mobile-first com visual de editor de código (VS Code Dark Modern). Reúne tarefas,
 lista de compras, finanças, metas, notas e uma midiateca de vídeos e músicas em um único lugar.
 
-O frontend funciona 100% no navegador, com dados salvos em `localStorage`. Login e sincronização
-com Supabase estão planejados para a fase 2, sem refazer as telas.
+O app funciona **local-first**: sem conta, tudo fica no `localStorage` do navegador ou do WebView.
+Com o Supabase configurado, é possível criar uma conta, manter os dados sincronizados entre
+dispositivos e continuar trabalhando offline com uma fila de alterações.
 
 O mesmo build também é empacotado como app Android com Capacitor 8. O Next.js gera arquivos
 estáticos em `out/`, que são sincronizados para o projeto nativo em `android/`.
@@ -20,10 +21,14 @@ estáticos em `out/`, que são sincronizados para o projeto nativo em `android/`
 - **Notas** — grade estilo mural, busca, fixação no topo, cores e edição.
 - **Mais** — atalhos para as seções secundárias e diagnóstico do workspace.
 - **Configurações** — nome, orçamento, cor de destaque, exportação/importação JSON, demo e limpeza.
+- **Conta** — cadastro, confirmação de e-mail, login, recuperação/redefinição de senha e logout.
+- **Sincronização** — cache por conta, fila offline, retry automático, importação do dispositivo e
+  escolha entre dados locais ou da nuvem no primeiro acesso.
 - **Command palette** — `Ctrl/Cmd + K` para navegar e criar itens (`#nova` nas rotas).
 - **PWA básica** — manifest, ícones e suporte a instalação no celular.
 - **App Android** — splash e ícones próprios, status bar escura, botão voltar nativo, haptics e safe areas.
-- **Movimento** — View Transitions entre rotas, entradas em cascata, feedback de toque e respeito a `prefers-reduced-motion`.
+- **Movimento** — View Transitions entre rotas, entradas em cascata, feedback de toque e respeito a
+  `prefers-reduced-motion`.
 
 ## Stack
 
@@ -31,9 +36,10 @@ estáticos em `out/`, que são sincronizados para o projeto nativo em `android/`
 - TypeScript
 - CSS custom properties e componentes próprios
 - [lucide-react](https://lucide.dev/) para ícones
-- `localStorage` como persistência atual
+- `localStorage` para o modo local, cache e fila de sincronização
+- [Supabase](https://supabase.com/) (Auth + Postgres + RLS) para a conta opcional
 - [Capacitor 8](https://capacitorjs.com/) para o app Android
-- Supabase + Vercel na fase 2
+- Vercel ou qualquer host estático para o deploy web
 
 Não há dependência de biblioteca de gráficos nem de framework CSS: donut e barras são SVG/CSS.
 
@@ -48,6 +54,19 @@ npm run dev
 ```
 
 Abra `http://localhost:3000`.
+
+O modo local não exige nenhuma variável. Para habilitar a conta e a nuvem, copie `.env.example`
+para `.env.local` e preencha os valores do seu projeto Supabase:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=https://seu-projeto.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+# Opcional; no Android é necessário para os links de e-mail abrirem no app/site certo.
+NEXT_PUBLIC_APP_URL=https://dashboard-pessoal.vercel.app
+```
+
+Projetos antigos também podem usar `NEXT_PUBLIC_SUPABASE_ANON_KEY` no lugar da publishable key.
+**Nunca** use a `service_role` no cliente, em variáveis `NEXT_PUBLIC_*` ou no repositório.
 
 ### Scripts
 
@@ -74,6 +93,49 @@ gera `out/` e executa um pós-build que achata os payloads RSC usados pelo rotea
 Isso é necessário porque o app é servido por arquivos estáticos, inclusive dentro do WebView
 do Android. `npm run preview` sobe um servidor local sem cache de HTML na porta `4173`.
 
+## Conta e sincronização
+
+Como o app é exportado estaticamente, a autenticação é **100% client-side**. O cliente Supabase usa
+o fluxo implícito para que os links de confirmação e recuperação criem a sessão diretamente no
+navegador, sem cookies de servidor.
+
+Rotas de conta:
+
+- `/entrar` — login por e-mail e senha.
+- `/criar-conta` — nome, e-mail e senha; a confirmação de e-mail precisa estar habilitada no Supabase.
+- `/recuperar-senha` — envio do link de recuperação.
+- `/redefinir-senha` — criação da nova senha a partir do link.
+
+Comportamento:
+
+1. Sem conta, o app continua no modo local com a chave `dashboard-pessoal.v1`.
+2. Ao entrar, o app carrega o cache específico daquela conta e busca a versão da nuvem.
+3. No primeiro acesso, se houver dados dos dois lados, você escolhe importar o dispositivo ou usar a nuvem.
+4. Cada alteração é aplicada de forma otimista e entra em uma fila local.
+5. A fila é enviada em ordem, deduplicada por tabela + registro, e tenta novamente quando a conexão volta.
+6. Ao sair, o cache e a fila daquela conta são removidos; os dados de convidado continuam no dispositivo.
+7. O Supabase é opcional. Se as variáveis não existirem, o app mostra o estado “modo local”.
+
+O schema, as políticas RLS e os detalhes de operação estão em
+[`supabase/schema.sql`](supabase/schema.sql) e [`docs/BACKEND.md`](docs/BACKEND.md).
+
+## Dados e privacidade
+
+- O modo de convidado fica em `localStorage` sob `dashboard-pessoal.v1`.
+- Cada conta tem cache, fila e metadados próprios, com prefixos `dashboard-pessoal.cloud.*`.
+- Na primeira visita, dados de demonstração aparecem para explorar o painel.
+- O botão **Começar do zero** (ou **Apagar todos os dados**) remove os registros e mantém nome,
+  orçamento e cor.
+- **Configurações → Dados e backup** permite exportar e importar um JSON completo.
+- A importação valida o arquivo com `lib/normalize.ts` antes de substituir os dados.
+- Não há telemetria. Notas e finanças não são enviadas para nenhum serviço além do Supabase da sua conta.
+- A chave pública do Supabase pode ficar no cliente; a autorização real é feita pelas políticas RLS.
+
+### Formato do backup
+
+O JSON exportado segue `DashboardData` em `lib/types.ts`: listas de tarefas, compras, movimentações,
+mídia, metas, notas e o objeto `settings`. O campo `version` permite migrações futuras.
+
 ## App Android
 
 O projeto nativo já está em `android/`, com application ID `com.caiosobrinho.dashboardpessoal`
@@ -94,24 +156,15 @@ adb install -r android/app/build/outputs/apk/debug/app-debug.apk
 
 O workflow [`.github/workflows/android-debug.yml`](.github/workflows/android-debug.yml) compila
 um APK de debug no GitHub Actions a cada push na `main` ou por execução manual. Baixe o artifact
-`dashboard-pessoal-debug`. O workflow só roda depois que o projeto estiver em um repositório GitHub.
+`dashboard-pessoal-debug`.
 
-O WebView guarda os dados no `localStorage` do app. Desinstalar o app apaga esses dados; use
-**Configurações → Dados e backup → Exportar JSON** antes de trocar de aparelho.
+O WebView guarda os dados no `localStorage` do app. Desinstalar o app apaga os dados locais; use
+**Configurações → Dados e backup → Exportar JSON** antes de trocar de aparelho. Com uma conta, os
+dados também podem ser recuperados da nuvem após o login.
 
-## Dados e privacidade
-
-- Tudo é salvo em `localStorage` sob a chave `dashboard-pessoal.v1`.
-- Na primeira visita, dados de demonstração aparecem para explorar o painel.
-- O botão **Começar do zero** (ou **Apagar todos os dados**) remove os registros e mantém nome, orçamento e cor.
-- **Configurações → Dados e backup** permite exportar e importar um JSON completo.
-- Não há autenticação, telemetria ou chamadas de backend nesta fase.
-- A importação valida o arquivo com `lib/normalize.ts` antes de substituir os dados.
-
-### Formato do backup
-
-O JSON exportado segue `DashboardData` em `lib/types.ts`: listas de tarefas, compras,
-movimentações, mídia, metas, notas e o objeto `settings`. O campo `version` permite migrações futuras.
+No Android, os links de confirmação e recuperação precisam de uma URL pública. Configure
+`NEXT_PUBLIC_APP_URL` no build ou a **Site URL** do Supabase; `https://localhost` do WebView não
+abre fora do app.
 
 ## Estrutura
 
@@ -126,50 +179,53 @@ components/
   native-bridge.tsx      status bar, splash, haptics e teclado
   page-transition.tsx    View Transitions entre rotas
   command-palette.tsx    Ctrl/Cmd + K
+  auth-provider.tsx      sessão e ações de autenticação
+  cloud-overlay.tsx      onboarding de importação/sincronização
   nav.ts                 metadados de navegação
 lib/
   types.ts               modelo de dados
   seed.ts                demonstração e estado vazio
-  store.tsx              estado, CRUD e persistência
+  store.tsx              estado, CRUD, persistência e sincronização
   normalize.ts           validação de importação/localStorage
   native.ts              bridge do Capacitor
   utils.ts               datas, moeda, URLs, ordenação
   constants.ts           categorias, cores, unidades
+  cloud/                 cache, fila e metadados locais por conta
+  supabase/              cliente, mapeamento de linhas e operações remotas
 public/                  ícones, manifest
 resources/               fonte do ícone e do splash do Android
 scripts/                 assets, preview estático, pós-build RSC e Gradle
 android/                 projeto nativo Capacitor (Gradle, manifest, recursos)
 .github/workflows/       build do APK de debug no GitHub Actions
 docs/ANDROID.md          build, execução, CI e assinatura Android
-docs/BACKEND.md          plano de migração para Supabase
+docs/BACKEND.md          Supabase, auth, RLS e sincronização
 supabase/schema.sql      schema, RLS e triggers
 ```
 
 ## Deploy web
 
 O build é estático, então pode ser publicado na Vercel ou em qualquer host de arquivos estáticos.
-O repositório já inclui o workflow do APK Android; ele não interfere no deploy web.
+O repositório inclui o workflow do APK Android; ele não interfere no deploy web.
 
 1. Envie o projeto para um repositório no GitHub.
 2. Importe o repositório na Vercel; o preset Next.js é detectado automaticamente.
-3. Enquanto a fase 2 não começa, nenhuma variável de ambiente é obrigatória.
-4. Faça o deploy. O dashboard continua salvando por navegador/dispositivo.
+3. Cadastre `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e
+   `NEXT_PUBLIC_APP_URL` em **Settings → Environment Variables**.
+4. Faça o deploy e copie a URL final para `NEXT_PUBLIC_APP_URL`.
+5. No Supabase, em **Authentication → URL Configuration**, use a URL de produção como **Site URL**
+   e adicione `https://SEU-DOMINIO/entrar/` e `https://SEU-DOMINIO/redefinir-senha/` às
+   **Redirect URLs**.
+6. Teste cadastro, confirmação de e-mail, login, sincronização e recuperação de senha em uma janela
+   anônima antes de liberar.
 
-Para a fase 2, copie as variáveis de `.env.example` no painel da Vercel e siga
-[`docs/BACKEND.md`](docs/BACKEND.md).
-
-O APK de debug é independente do deploy web: veja [`docs/ANDROID.md`](docs/ANDROID.md).
-
-## Supabase (fase 2)
-
-O schema inicial está em [`supabase/schema.sql`](supabase/schema.sql), com tabelas por usuário,
-RLS habilitada e trigger de criação do perfil. O plano completo — autenticação, migração do
-`localStorage`, cache offline e checklist de deploy — está em [`docs/BACKEND.md`](docs/BACKEND.md).
+Sem as variáveis do Supabase, o deploy continua funcionando no modo local. O APK de debug é
+independente do deploy web: veja [`docs/ANDROID.md`](docs/ANDROID.md).
 
 ## Decisões de interface
 
 - Mobile-first: navegação inferior, modais em folha e áreas de toque confortáveis.
-- Desktop: activity bar, status bar, command palette e layout em grid.
+- Desktop: activity bar, status bar, command palette, grid de 12 colunas e Configurações em duas colunas.
 - Cada página tem URL própria e cria o item principal com `#nova`, o que permite atalhos da palette.
-- Acessibilidade: foco visível, `aria-*`, fechamento por `Esc`, foco preso em modais e estados vazios claros.
+- Acessibilidade: foco visível, `aria-*`, fechamento por `Esc`, foco preso em modais, contraste
+  revisado e estados vazios claros.
 - `prefers-reduced-motion` é respeitado.
