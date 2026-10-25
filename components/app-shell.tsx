@@ -10,6 +10,7 @@ import {
   Settings,
   TriangleAlert,
   UserRound,
+  RefreshCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -55,11 +56,7 @@ function TitleBar({ onOpenPalette }: { onOpenPalette: () => void }) {
   return (
     <header className="titlebar">
       <div className="titlebar-left">
-        <div className="window-dots" aria-hidden="true">
-          <span className="window-dot red" />
-          <span className="window-dot yellow" />
-          <span className="window-dot green" />
-        </div>
+        {/* 3 dots removed */}
         <span className="titlebar-title">
           dashboard-pessoal <span>— Visual Studio Code</span>
         </span>
@@ -87,6 +84,14 @@ function TitleBar({ onOpenPalette }: { onOpenPalette: () => void }) {
         <Link className="icon-btn" href="/configuracoes" aria-label="Configurações">
           <Settings size={16} />
         </Link>
+        <button
+          type="button"
+          className="icon-btn"
+          onClick={() => window.location.reload()}
+          aria-label="Atualizar"
+        >
+          <RefreshCcw size={16} />
+        </button>
       </div>
     </header>
   );

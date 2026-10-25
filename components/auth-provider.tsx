@@ -31,6 +31,7 @@ type AuthValue = {
   resetPassword: (email: string) => Promise<AuthActionResult>;
   updatePassword: (password: string) => Promise<AuthActionResult>;
   resendConfirmation: (email: string) => Promise<AuthActionResult>;
+  signInWithProvider: (provider: string) => Promise<AuthActionResult>;
 };
 
 const AuthContext = createContext<AuthValue | null>(null);
@@ -236,6 +237,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ok: true,
           message: "Reenviamos o link de confirmação. Confira a caixa de entrada e o spam.",
         };
+      },
+      signInWithProvider: async (provider) => {
+        const client = getSupabaseClient();
+        if (!client) return unavailable;
+        const { error } = await client.auth.signInWithOAuth({
+          provider: provider as any,
+          options: { redirectTo: authRedirect("/entrar/") },
+        });
+        if (error) return { ok: false, message: translateAuthError(error.message) };
+        return { ok: true, message: "Redirecionando..." };
       },
     };
   }, [configured, loading, user, session]);
