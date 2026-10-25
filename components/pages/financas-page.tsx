@@ -18,6 +18,7 @@ import { MonthBars } from "@/components/charts/month-bars";
 import { TransactionFormModal } from "@/components/finance/transaction-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { categoryColor } from "@/lib/constants";
 import { useStore } from "@/lib/store";
 import type { Transaction, TransactionType } from "@/lib/types";
@@ -141,13 +142,7 @@ export function FinancasPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">financas.db</span>
-          </div>
+          <Breadcrumb segments={[{ label: "financas.db" }]} />
           <h1 className="page-title">Finanças</h1>
           <p className="page-subtitle">
             {balance >= 0

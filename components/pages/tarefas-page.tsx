@@ -6,6 +6,7 @@ import { TaskFormModal } from "@/components/tasks/task-form";
 import { TaskRow } from "@/components/tasks/task-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { useOpenOnHash } from "@/lib/use-hash-modal";
@@ -117,13 +118,7 @@ export function TarefasPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">tarefas.md</span>
-          </div>
+          <Breadcrumb segments={[{ label: "tarefas.md" }]} />
           <h1 className="page-title">Tarefas</h1>
           <p className="page-subtitle">
             {pending.length === 0

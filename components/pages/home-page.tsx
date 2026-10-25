@@ -28,6 +28,7 @@ import { TaskRow } from "@/components/tasks/task-row";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { categoryColor, SHOPPING_CATEGORY_COLORS } from "@/lib/constants";
@@ -76,10 +77,13 @@ export function HomePage() {
   const previousMonth = monthKey(addMonths(now, -1));
 
   const pendingTasks = useMemo(() => data.tasks.filter((task) => !task.done), [data.tasks]);
-  const doneToday = data.tasks.filter(isDoneToday).length;
-  const totalTasks = data.tasks.length;
-  const doneTasks = data.tasks.filter((task) => task.done).length;
-  const taskProgress = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+  const doneToday = useMemo(() => data.tasks.filter(isDoneToday).length, [data.tasks]);
+  const totalTasks = useMemo(() => data.tasks.length, [data.tasks]);
+  const doneTasks = useMemo(() => data.tasks.filter((task) => task.done).length, [data.tasks]);
+  const taskProgress = useMemo(
+    () => (totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0),
+    [doneTasks, totalTasks],
+  );
   const topTasks = useMemo(() => sortTasks(pendingTasks).slice(0, 4), [pendingTasks]);
 
   const monthTransactions = useMemo(
@@ -117,9 +121,10 @@ export function HomePage() {
       .map(([label, value]) => ({ label, value, color: categoryColor(label) }));
   }, [monthTransactions]);
 
-  const pendingShopping = data.shopping.filter((item) => !item.done);
-  const shoppingEstimate = sum(
-    pendingShopping.map((item) => (item.price ?? 0) * item.quantity),
+  const pendingShopping = useMemo(() => data.shopping.filter((item) => !item.done), [data.shopping]);
+  const shoppingEstimate = useMemo(
+    () => sum(pendingShopping.map((item) => (item.price ?? 0) * item.quantity)),
+    [pendingShopping],
   );
   const recentMedia = useMemo(
     () =>
@@ -129,11 +134,17 @@ export function HomePage() {
     [data.media],
   );
   const goals = useMemo(() => sortGoals(data.goals), [data.goals]);
-  const goalsAverage =
-    goals.length > 0
-      ? Math.round(sum(goals.map((goal) => percent(goal.current, goal.target))) / goals.length)
-      : 0;
-  const completedGoals = goals.filter((goal) => goal.current >= goal.target).length;
+  const goalsAverage = useMemo(
+    () =>
+      goals.length > 0
+        ? Math.round(sum(goals.map((goal) => percent(goal.current, goal.target))) / goals.length)
+        : 0,
+    [goals],
+  );
+  const completedGoals = useMemo(
+    () => goals.filter((goal) => goal.current >= goal.target).length,
+    [goals],
+  );
 
   const closeModal = () => setModal(null);
   const taskBeingEdited = modal?.type === "task" ? modal.task ?? null : null;
@@ -141,13 +152,7 @@ export function HomePage() {
   return (
     <div className="page">
       <header className="home-hero">
-        <div className="breadcrumb">
-          <span>~</span>
-          <span className="slash">/</span>
-          <span>dashboard</span>
-          <span className="slash">/</span>
-          <span className="current">inicio.tsx</span>
-        </div>
+        <Breadcrumb segments={[{ label: "inicio.tsx" }]} />
         <h1 className="home-title">
           <span>{greeting},</span>
           <span className="name">{firstName}.</span>

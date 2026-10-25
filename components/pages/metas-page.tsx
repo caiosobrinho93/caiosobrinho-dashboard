@@ -15,6 +15,7 @@ import {
 } from "@/components/goals/goal-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useStore } from "@/lib/store";
 import type { Goal } from "@/lib/types";
 import { useOpenOnHash } from "@/lib/use-hash-modal";
@@ -182,13 +183,7 @@ export function MetasPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">metas.goals</span>
-          </div>
+          <Breadcrumb segments={[{ label: "metas.goals" }]} />
           <h1 className="page-title">Metas</h1>
           <p className="page-subtitle">
             {goals.length === 0

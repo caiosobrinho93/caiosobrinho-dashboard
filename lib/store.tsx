@@ -148,6 +148,7 @@ function entityDiff<T extends { id: string }>(
   previous: T[],
   next: T[],
 ): MutationSeed[] {
+  const previousMap = new Map(previous.map((item) => [item.id, JSON.stringify(item)]));
   const nextIds = new Set(next.map((item) => item.id));
   const seeds: MutationSeed[] = [];
 
@@ -157,7 +158,11 @@ function entityDiff<T extends { id: string }>(
     }
   }
   for (const item of next) {
-    seeds.push({ table, op: "upsert", rowId: item.id, payload: item });
+    // Só faz upsert se o item mudou ou é novo
+    const prevJson = previousMap.get(item.id);
+    if (prevJson === undefined || prevJson !== JSON.stringify(item)) {
+      seeds.push({ table, op: "upsert", rowId: item.id, payload: item });
+    }
   }
 
   return seeds;

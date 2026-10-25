@@ -7,10 +7,11 @@ import {
   ShoppingCart,
   Trash2,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ShoppingFormModal } from "@/components/shopping/shopping-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import {
   SHOPPING_CATEGORIES,
   SHOPPING_CATEGORY_COLORS,
@@ -34,6 +35,7 @@ export function ComprasPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<ShoppingItem | null>(null);
   const [confirmClearDone, setConfirmClearDone] = useState(false);
+  const confirmResetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const pending = data.shopping.filter((item) => !item.done);
   const done = data.shopping.filter((item) => item.done);
@@ -91,8 +93,12 @@ export function ComprasPage() {
   function handleClearDone() {
     if (!confirmClearDone) {
       setConfirmClearDone(true);
+      // Auto-reset após 3 segundos se o usuário não confirmar
+      if (confirmResetTimer.current) clearTimeout(confirmResetTimer.current);
+      confirmResetTimer.current = setTimeout(() => setConfirmClearDone(false), 3000);
       return;
     }
+    if (confirmResetTimer.current) clearTimeout(confirmResetTimer.current);
     clearCompletedShopping();
     setConfirmClearDone(false);
   }
@@ -148,13 +154,7 @@ export function ComprasPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">compras.md</span>
-          </div>
+          <Breadcrumb segments={[{ label: "compras.md" }]} />
           <h1 className="page-title">Compras</h1>
           <p className="page-subtitle">
             {pending.length === 0

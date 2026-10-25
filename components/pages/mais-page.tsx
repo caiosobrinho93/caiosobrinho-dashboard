@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { Panel } from "@/components/ui/panel";
 import { useStore } from "@/lib/store";
 import { formatBytes, percent, sum } from "@/lib/utils";
@@ -32,24 +33,33 @@ export function MaisPage() {
   } = useStore();
   const { user } = useAuth();
 
-  const videos = data.media.filter((item) => item.kind === "video").length;
-  const musics = data.media.filter((item) => item.kind === "musica").length;
-  const pinnedNotes = data.notes.filter((note) => note.pinned).length;
-  const completedGoals = data.goals.filter((goal) => goal.current >= goal.target).length;
-  const goalsAverage =
-    data.goals.length > 0
-      ? Math.round(
-          sum(data.goals.map((goal) => percent(goal.current, goal.target))) / data.goals.length,
-        )
-      : 0;
+  const videos = useMemo(() => data.media.filter((item) => item.kind === "video").length, [data.media]);
+  const musics = useMemo(() => data.media.filter((item) => item.kind === "musica").length, [data.media]);
+  const pinnedNotes = useMemo(() => data.notes.filter((note) => note.pinned).length, [data.notes]);
+  const completedGoals = useMemo(
+    () => data.goals.filter((goal) => goal.current >= goal.target).length,
+    [data.goals],
+  );
+  const goalsAverage = useMemo(
+    () =>
+      data.goals.length > 0
+        ? Math.round(
+            sum(data.goals.map((goal) => percent(goal.current, goal.target))) / data.goals.length,
+          )
+        : 0,
+    [data.goals],
+  );
 
-  const recordCount =
-    data.tasks.length +
-    data.shopping.length +
-    data.transactions.length +
-    data.media.length +
-    data.goals.length +
-    data.notes.length;
+  const recordCount = useMemo(
+    () =>
+      data.tasks.length +
+      data.shopping.length +
+      data.transactions.length +
+      data.media.length +
+      data.goals.length +
+      data.notes.length,
+    [data],
+  );
 
   const storageBytes = useMemo(
     () => new TextEncoder().encode(JSON.stringify(data)).length,
@@ -78,13 +88,7 @@ export function MaisPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">mais.tsx</span>
-          </div>
+          <Breadcrumb segments={[{ label: "mais.tsx" }]} />
           <h1 className="page-title">Mais</h1>
           <p className="page-subtitle">
             Atalhos, preferências e o estado do seu workspace.

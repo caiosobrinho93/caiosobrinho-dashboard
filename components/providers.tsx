@@ -1,22 +1,21 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { AppShell } from "@/components/app-shell";
+import { useEffect, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { AppShell, AUTH_PATHS } from "@/components/app-shell";
 import { AuthProvider, useAuth } from "@/components/auth-provider";
 import { NativeBridge } from "@/components/native-bridge";
+import { stripBasePath } from "@/lib/base-path";
 import { StoreProvider } from "@/lib/store";
-import { AUTH_PATHS } from "@/components/app-shell";
-import { usePathname } from "next/navigation";
-
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <AuthProvider>
       <StoreProvider>
         <NativeBridge />
-        <AuthGuard>{children}</AuthGuard>
+        <AuthGuard>
+          <AppShell>{children}</AppShell>
+        </AuthGuard>
       </StoreProvider>
     </AuthProvider>
   );
@@ -26,11 +25,18 @@ function AuthGuard({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+
+  const normalizedPath = stripBasePath(pathname).replace(/\/+$/, "") || "/";
+  const isAuthRoute = AUTH_PATHS.includes(normalizedPath);
+
   useEffect(() => {
-    if (!loading && !user && !AUTH_PATHS.includes(pathname)) {
+    if (!loading && !user && !isAuthRoute) {
       router.replace("/entrar");
     }
-  }, [loading, user, router, pathname]);
+  }, [loading, user, router, isAuthRoute]);
+
   if (loading) return null;
+  if (!user && !isAuthRoute) return null;
+
   return <>{children}</>;
 }

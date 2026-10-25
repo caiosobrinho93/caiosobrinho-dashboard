@@ -27,6 +27,7 @@ import { useAuth } from "@/components/auth-provider";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { Modal } from "@/components/ui/modal";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ACCENTS } from "@/lib/constants";
 import { useStore } from "@/lib/store";
 import type { AccentKey } from "@/lib/types";
@@ -268,13 +269,7 @@ export function ConfiguracoesPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">settings.json</span>
-          </div>
+          <Breadcrumb segments={[{ label: "settings.json" }]} />
           <h1 className="page-title">Configurações</h1>
           <p className="page-subtitle">
             Preferências, conta, backup e sincronização entre dispositivos.

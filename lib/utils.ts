@@ -105,8 +105,11 @@ export function isoDate(year: number, monthIndex: number, day: number): string {
 }
 
 export function parseISODate(iso: string): Date {
+  if (!iso || typeof iso !== "string") return new Date();
   const [year, month, day] = iso.split("-").map(Number);
-  return new Date(year, (month ?? 1) - 1, day ?? 1, 12, 0, 0);
+  if (!year || !month || !day) return new Date();
+  const date = new Date(year, (month ?? 1) - 1, day ?? 1, 12, 0, 0);
+  return Number.isNaN(date.getTime()) ? new Date() : date;
 }
 
 export function addDays(iso: string, days: number): string {
@@ -333,7 +336,13 @@ export function sortTasks(tasks: Task[]): Task[] {
     if (a.due && b.due && a.due !== b.due) return a.due.localeCompare(b.due);
     if (a.due && !b.due) return -1;
     if (!a.due && b.due) return 1;
-    return a.priority.localeCompare(b.priority);
+    // Ordenar por prioridade real (alta=0, media=1, baixa=2) em vez de alfabético
+    const PRIORITY_ORDER: Record<string, number> = { alta: 0, media: 1, baixa: 2 };
+    const pa = PRIORITY_ORDER[a.priority] ?? 1;
+    const pb = PRIORITY_ORDER[b.priority] ?? 1;
+    if (pa !== pb) return pa - pb;
+    // Desempate: mais recente primeiro
+    return b.createdAt.localeCompare(a.createdAt);
   });
 }
 

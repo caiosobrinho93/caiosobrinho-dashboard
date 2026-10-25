@@ -13,6 +13,7 @@ import { useMemo, useState } from "react";
 import { MediaFormModal } from "@/components/media/media-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useStore } from "@/lib/store";
 import type { MediaKind, MediaLink } from "@/lib/types";
 import { useOpenOnHash } from "@/lib/use-hash-modal";
@@ -247,13 +248,7 @@ export function MidiaPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">midia.json</span>
-          </div>
+          <Breadcrumb segments={[{ label: "midia.json" }]} />
           <h1 className="page-title">Mídia</h1>
           <p className="page-subtitle">
             {videos.length} vídeo{videos.length === 1 ? "" : "s"} e {musics.length} música

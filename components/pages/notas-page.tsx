@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { NoteFormModal } from "@/components/notes/note-form";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useStore } from "@/lib/store";
 import type { Note } from "@/lib/types";
 import { useOpenOnHash } from "@/lib/use-hash-modal";
@@ -116,13 +117,7 @@ export function NotasPage() {
     <div className="page">
       <div className="page-header">
         <div className="page-heading">
-          <div className="breadcrumb">
-            <span>~</span>
-            <span className="slash">/</span>
-            <span>dashboard</span>
-            <span className="slash">/</span>
-            <span className="current">notas.md</span>
-          </div>
+          <Breadcrumb segments={[{ label: "notas.md" }]} />
           <h1 className="page-title">Notas</h1>
           <p className="page-subtitle">
             {notes.length === 0
