@@ -34,9 +34,9 @@
   --space-12: 48px; /* 3X large */
 
   /* ===== Apple HIG Border Radius (Concentric) ===== */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
   --radius-xl: 20px;
   --radius-2xl: 24px;
   --radius-full: 9999px; /* Capsule */
@@ -55,8 +55,8 @@
   --duration-slow: 500ms;
 
   /* ===== Apple System Colors (Light Mode Defaults) ===== */
-  --system-blue: #007AFF;
-  --system-green: #34C759;
+  --system-blue: #0066CC;
+  --system-green: #28A745;
   --system-indigo: #5856D6;
   --system-orange: #FF9500;
   --system-pink: #FF2D55;
@@ -115,8 +115,8 @@
 
   /* Use Apple concentric radius for components */
   --radius: 12px;       /* Matches --radius-md */
-  --radius-sm: 8px;     /* Matches --radius-sm */
-  --radius-lg: 16px;    /* Matches --radius-lg */
+  --radius-sm: 10px;     /* Matches --radius-sm */
+  --radius-lg: 20px;    /* Matches --radius-lg */
 
   --shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
   --shadow-soft: 0 4px 18px rgba(0, 0, 0, 0.25);
