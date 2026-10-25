@@ -10,6 +10,7 @@ import {
   Music2,
   Plus,
   Receipt,
+  RefreshCw,
   ShoppingCart,
   Target,
   TrendingDown,
@@ -28,7 +29,9 @@ import { TaskRow } from "@/components/tasks/task-row";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
+import { useAuth } from "@/components/auth-provider";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
+import { hapticTap } from "@/lib/native";
 import { useStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { categoryColor, SHOPPING_CATEGORY_COLORS } from "@/lib/constants";
@@ -66,9 +69,27 @@ export function HomePage() {
     toggleShoppingItem,
     dismissDemoBanner,
     clearAll,
+    syncNow,
+    cloudConfigured,
   } = useStore();
+  const { user } = useAuth();
   const [modal, setModal] = useState<HomeModal>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    void hapticTap();
+    try {
+      if (cloudConfigured && user) {
+        await syncNow();
+      }
+    } catch {
+      // Ignora
+    } finally {
+      window.location.reload();
+    }
+  };
 
   const firstName = data.settings.name.trim().split(/\s+/)[0] || "por aí";
   const greeting = getGreeting();
@@ -152,7 +173,20 @@ export function HomePage() {
   return (
     <div className="page">
       <header className="home-hero">
-        <Breadcrumb segments={[{ label: "inicio.tsx" }]} />
+        <div className="home-hero-top">
+          <Breadcrumb segments={[{ label: "inicio.tsx" }]} />
+          <button
+            type="button"
+            className={`home-refresh-chip${refreshing ? " refreshing" : ""}`}
+            onClick={handleRefresh}
+            disabled={refreshing}
+            aria-label="Atualizar dados do feed"
+            title="Atualizar dados e sincronizar"
+          >
+            <RefreshCw size={12} className={refreshing ? "spin" : ""} />
+            <span>{refreshing ? "Atualizando..." : "Atualizar"}</span>
+          </button>
+        </div>
         <h1 className="home-title">
           <span>{greeting},</span>
           <span className="name">{firstName}.</span>
@@ -197,6 +231,16 @@ export function HomePage() {
       ) : null}
 
       <div className="quick-actions" aria-label="Ações rápidas">
+        <button
+          type="button"
+          className="quick-action"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          title="Atualizar feed e dados"
+        >
+          <RefreshCw size={14} className={refreshing ? "spin" : ""} style={{ color: "var(--teal)" }} />
+          Atualizar feed
+        </button>
         <button
           type="button"
           className="quick-action"

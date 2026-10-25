@@ -6,11 +6,11 @@ import {
   CircleCheck,
   Cloud,
   GitBranch,
+  RefreshCw,
   Search,
   Settings,
   TriangleAlert,
   UserRound,
-  RefreshCcw,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -26,7 +26,7 @@ import {
   SETTINGS_ITEM,
 } from "@/components/nav";
 import { stripBasePath, withBasePath } from "@/lib/base-path";
-import { hideNativeSplash, isNativeApp } from "@/lib/native";
+import { hideNativeSplash, hapticTap, isNativeApp } from "@/lib/native";
 import { useStore } from "@/lib/store";
 
 const TITLES: Record<string, string> = {
@@ -51,7 +51,15 @@ function formatCount(count: number): string {
   return count > 9 ? "9+" : String(count);
 }
 
-function TitleBar({ onOpenPalette }: { onOpenPalette: () => void }) {
+function TitleBar({
+  onOpenPalette,
+  onRefresh,
+  refreshing,
+}: {
+  onOpenPalette: () => void;
+  onRefresh: () => void;
+  refreshing: boolean;
+}) {
   return (
     <header className="titlebar">
       <div className="titlebar-left">
@@ -80,17 +88,22 @@ function TitleBar({ onOpenPalette }: { onOpenPalette: () => void }) {
         >
           <Search size={17} />
         </button>
+        <button
+          type="button"
+          className={`titlebar-refresh-btn${refreshing ? " refreshing" : ""}`}
+          onClick={onRefresh}
+          disabled={refreshing}
+          aria-label="Atualizar dados do app"
+          title="Atualizar dados e sincronizar"
+        >
+          <RefreshCw size={13} className={refreshing ? "spin" : ""} />
+          <span className="titlebar-refresh-text">
+            {refreshing ? "Atualizando..." : "Atualizar"}
+          </span>
+        </button>
         <Link className="icon-btn" href="/configuracoes" aria-label="Configurações">
           <Settings size={16} />
         </Link>
-        <button
-          type="button"
-          className="icon-btn"
-          onClick={() => window.location.reload()}
-          aria-label="Atualizar"
-        >
-          <RefreshCcw size={16} />
-        </button>
       </div>
     </header>
   );
@@ -248,13 +261,28 @@ function StatusBar() {
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { data, hydrated } = useStore();
-  const { loading: authLoading } = useAuth();
+  const { data, hydrated, syncNow, cloudConfigured } = useStore();
+  const { user, loading: authLoading } = useAuth();
   const normalizedPath = stripBasePath(pathname).replace(/\/+$/, "") || "/";
   const isAuthRoute = AUTH_PATHS.includes(normalizedPath);
   const introReady = useIntroDelay(isAuthRoute ? 0 : 280);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const mainRef = useRef<HTMLElement>(null);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    void hapticTap();
+    try {
+      if (cloudConfigured && user) {
+        await syncNow();
+      }
+    } catch {
+      // Ignora erro
+    } finally {
+      window.location.reload();
+    }
+  };
 
   const pendingTasks = data.tasks.filter((task) => !task.done).length;
   const pendingShopping = data.shopping.filter((item) => !item.done).length;
@@ -337,7 +365,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         Pular para o conteúdo
       </a>
 
-      <TitleBar onOpenPalette={() => setPaletteOpen(true)} />
+      <TitleBar
+        onOpenPalette={() => setPaletteOpen(true)}
+        onRefresh={handleRefresh}
+        refreshing={refreshing}
+      />
 
       <div className="app-body">
         <ActivityBar

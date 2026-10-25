@@ -376,6 +376,38 @@ a:focus:not(:focus-visible) {
   color: var(--red);
 }
 
+.titlebar-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--accent-border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, transform 120ms ease, color 120ms ease;
+  white-space: nowrap;
+}
+
+.titlebar-refresh-btn:hover {
+  background: rgba(55, 148, 255, 0.22);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.titlebar-refresh-btn:active {
+  transform: scale(0.96);
+}
+
+.titlebar-refresh-btn.refreshing {
+  opacity: 0.8;
+  pointer-events: none;
+}
+
 .app-body {
   display: flex;
   flex: 1;
@@ -782,6 +814,46 @@ a:focus:not(:focus-visible) {
 
 .home-hero {
   padding: 6px 0 2px;
+}
+
+.home-hero-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.home-refresh-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 12px;
+  border: 1px solid #383838;
+  background: #252526;
+  color: var(--text-dim);
+  font-size: 10.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.home-refresh-chip:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  color: var(--text-strong);
+}
+
+.home-refresh-chip:active {
+  transform: scale(0.96);
+}
+
+.home-refresh-chip.refreshing {
+  opacity: 0.8;
+  pointer-events: none;
 }
 
 .home-title {
@@ -5581,4 +5653,16 @@ input[type="number"]::-webkit-inner-spin-button {
   padding: 0 3px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 480px) {
+  .titlebar-refresh-text {
+    display: none;
+  }
+  .titlebar-refresh-btn {
+    padding: 0 6px;
+    height: 30px;
+    width: 30px;
+    justify-content: center;
+  }
 }
