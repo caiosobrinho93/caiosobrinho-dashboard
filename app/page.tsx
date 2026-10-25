@@ -1,4 +1,4 @@
-import "use client";
+"use client";
 import type { Metadata } from "next";
 import { PageTransition } from "@/components/page-transition";
 import { HomePage } from "@/components/pages/home-page";
