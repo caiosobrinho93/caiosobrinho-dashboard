@@ -187,9 +187,13 @@ Estados exibidos: `local`, `connecting`, `syncing`, `synced`, `offline` e `error
 ## Deploy
 
 - **Desenvolvimento:** `.env.local` (ignorado pelo Git).
-- **Produção:** variáveis na Vercel; a URL final também deve ir para `NEXT_PUBLIC_APP_URL`.
+- **Produção:** variáveis no host (GitHub Pages Actions ou Vercel); a URL final também deve ir para
+  `NEXT_PUBLIC_APP_URL`.
+- **GitHub Pages:** o workflow `pages.yml` define `NEXT_PUBLIC_BASE_PATH` e publica em
+  `https://caiosobrinho93.github.io/caiosobrinho-dashboard/`.
 - **Supabase:** Site URL e Redirect URLs precisam incluir as rotas de confirmação e recuperação.
-- **Build:** `npm run build` gera `out/`; a Vercel detecta Next.js e publica o export estático.
+- **Build:** `npm run build` gera `out/`; a Vercel detecta Next.js e o Pages publica o export
+  estático com o prefixo de subcaminho.
 - **Sem variáveis:** o deploy continua em modo local, sem login nem sincronização.
 
 Consulte também o [README](../README.md) e o [guia Android](ANDROID.md).

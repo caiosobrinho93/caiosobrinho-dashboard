@@ -25,6 +25,7 @@ import {
   SECONDARY_PATHS,
   SETTINGS_ITEM,
 } from "@/components/nav";
+import { stripBasePath, withBasePath } from "@/lib/base-path";
 import { hideNativeSplash, isNativeApp } from "@/lib/native";
 import { useStore } from "@/lib/store";
 
@@ -103,7 +104,7 @@ function ActivityBar({
   return (
     <nav className="activity-bar" aria-label="Navegação do workspace">
       <Link href="/" className="activity-logo" aria-label="Início">
-        <img src="/icon.svg" alt="" />
+        <img src={withBasePath("/icon.svg")} alt="" />
       </Link>
 
       {NAV_ITEMS.map((item) => {
@@ -291,8 +292,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { data, hydrated } = useStore();
   const { loading: authLoading } = useAuth();
-  const normalizedPath =
-    pathname !== "/" ? pathname.replace(/\/+$/, "") : pathname;
+  const normalizedPath = stripBasePath(pathname).replace(/\/+$/, "") || "/";
   const isAuthRoute = AUTH_PATHS.includes(normalizedPath);
   const introReady = useIntroDelay(isAuthRoute ? 0 : 280);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -347,7 +347,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         return;
       }
 
-      if (pathname !== "/") {
+      if (normalizedPath !== "/") {
         if (canGoBack) router.back();
         else router.push("/");
         return;
@@ -363,7 +363,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       disposed = true;
       void listener?.remove();
     };
-  }, [pathname, router]);
+  }, [normalizedPath, router]);
 
   if (!hydrated || authLoading || !introReady) {
     return <BootScreen />;
@@ -383,7 +383,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="app-body">
         <ActivityBar
-          pathname={pathname}
+          pathname={normalizedPath}
           pendingTasks={pendingTasks}
           pendingShopping={pendingShopping}
         />
@@ -394,7 +394,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <StatusBar />
       <MobileNav
-        pathname={pathname}
+        pathname={normalizedPath}
         pendingTasks={pendingTasks}
         pendingShopping={pendingShopping}
       />

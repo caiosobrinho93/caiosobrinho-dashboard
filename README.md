@@ -196,7 +196,7 @@ public/                  ícones, manifest
 resources/               fonte do ícone e do splash do Android
 scripts/                 assets, preview estático, pós-build RSC e Gradle
 android/                 projeto nativo Capacitor (Gradle, manifest, recursos)
-.github/workflows/       build do APK de debug no GitHub Actions
+.github/workflows/       deploy web no GitHub Pages e build do APK de debug
 docs/ANDROID.md          build, execução, CI e assinatura Android
 docs/BACKEND.md          Supabase, auth, RLS e sincronização
 supabase/schema.sql      schema, RLS e triggers
@@ -204,19 +204,48 @@ supabase/schema.sql      schema, RLS e triggers
 
 ## Deploy web
 
-O build é estático, então pode ser publicado na Vercel ou em qualquer host de arquivos estáticos.
-O repositório inclui o workflow do APK Android; ele não interfere no deploy web.
+O build é estático. O repositório inclui dois caminhos de publicação:
 
-1. Envie o projeto para um repositório no GitHub.
-2. Importe o repositório na Vercel; o preset Next.js é detectado automaticamente.
-3. Cadastre `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e
+### GitHub Pages (incluído)
+
+O workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publica o site a cada push
+na `main`, usando o subcaminho do repositório. Ele define `NEXT_PUBLIC_BASE_PATH` e
+`NEXT_PUBLIC_APP_URL` automaticamente. Neste repositório, a URL é:
+
+```text
+https://caiosobrinho93.github.io/caiosobrinho-dashboard/
+```
+
+Para habilitar em outro fork, vá em **Settings → Pages → Source** e escolha **GitHub Actions**.
+Cadastre as variáveis `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e,
+se quiser, `NEXT_PUBLIC_APP_URL` em **Settings → Secrets and variables → Actions → Variables**.
+
+### Vercel (opcional)
+
+A Vercel também publica o mesmo build, sem `basePath`:
+
+1. Importe o repositório na Vercel; o preset Next.js é detectado automaticamente.
+2. Cadastre `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` e
    `NEXT_PUBLIC_APP_URL` em **Settings → Environment Variables**.
-4. Faça o deploy e copie a URL final para `NEXT_PUBLIC_APP_URL`.
-5. No Supabase, em **Authentication → URL Configuration**, use a URL de produção como **Site URL**
-   e adicione `https://SEU-DOMINIO/entrar/` e `https://SEU-DOMINIO/redefinir-senha/` às
-   **Redirect URLs**.
-6. Teste cadastro, confirmação de e-mail, login, sincronização e recuperação de senha em uma janela
-   anônima antes de liberar.
+3. Faça o deploy e copie a URL final para `NEXT_PUBLIC_APP_URL`.
+4. Não defina `NEXT_PUBLIC_BASE_PATH` na Vercel: ela é usada apenas no GitHub Pages.
+
+### Configuração do Supabase
+
+Em **Authentication → URL Configuration**, use a URL publicada como **Site URL** e adicione as
+duas rotas às **Redirect URLs**:
+
+```text
+https://SEU-DOMINIO/entrar/
+https://SEU-DOMINIO/redefinir-senha/
+```
+
+No GitHub Pages, o domínio inclui o repositório:
+
+```text
+https://caiosobrinho93.github.io/caiosobrinho-dashboard/entrar/
+https://caiosobrinho93.github.io/caiosobrinho-dashboard/redefinir-senha/
+```
 
 Sem as variáveis do Supabase, o deploy continua funcionando no modo local. O APK de debug é
 independente do deploy web: veja [`docs/ANDROID.md`](docs/ANDROID.md).

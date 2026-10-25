@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { Providers } from "@/components/providers";
+import { withBasePath } from "@/lib/base-path";
 
 export const metadata: Metadata = {
   title: {
@@ -10,13 +11,17 @@ export const metadata: Metadata = {
   description:
     "Tarefas, compras, finanças, metas, notas e links em um único painel pessoal com visual de editor de código.",
   applicationName: "Dashboard pessoal",
-  manifest: "/manifest.webmanifest",
+  manifest: withBasePath("/manifest.webmanifest"),
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: withBasePath("/icon.svg"), type: "image/svg+xml" },
+      {
+        url: withBasePath("/icon-192.png"),
+        sizes: "192x192",
+        type: "image/png",
+      },
     ],
-    apple: "/apple-touch-icon.png",
+    apple: withBasePath("/apple-touch-icon.png"),
   },
   appleWebApp: {
     capable: true,

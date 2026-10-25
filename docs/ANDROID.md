@@ -39,6 +39,10 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
 NEXT_PUBLIC_APP_URL=https://seu-dominio-publico.com
 ```
 
+Neste repositório, o valor usado no APK é
+`https://caiosobrinho93.github.io/caiosobrinho-dashboard` (sem barra final). Não defina
+`NEXT_PUBLIC_BASE_PATH` no build do Android: o WebView serve o app na raiz.
+
 Sem essas variáveis, o APK inicia em modo local e não mostra o fluxo de conta. A publishable/anon key
 é pública por design; nunca use `service_role` no APK.
 
@@ -47,10 +51,11 @@ Sem essas variáveis, o APK inicia em modo local e não mostra o fluxo de conta.
 O WebView roda em `https://localhost`. Esse endereço não é acessível pelo navegador externo, então
 os links de e-mail precisam apontar para uma URL pública:
 
-1. Publique a versão web (Vercel ou outro host estático).
+1. Publique a versão web (GitHub Pages ou Vercel).
 2. Configure `NEXT_PUBLIC_APP_URL` com essa URL no build do APK.
-3. No Supabase, use a mesma URL como **Site URL** e cadastre as Redirect URLs:
-   `https://seu-dominio/entrar/` e `https://seu-dominio/redefinir-senha/`.
+3. No Supabase, use a mesma URL como **Site URL** e cadastre as Redirect URLs. No GitHub Pages:
+   `https://caiosobrinho93.github.io/caiosobrinho-dashboard/entrar/` e
+   `https://caiosobrinho93.github.io/caiosobrinho-dashboard/redefinir-senha/`.
 
 Sem uma URL pública, o Supabase pode usar a Site URL do projeto e abrir o link no navegador. O
 WebView não compartilha automaticamente a sessão criada no navegador externo; o retorno automático

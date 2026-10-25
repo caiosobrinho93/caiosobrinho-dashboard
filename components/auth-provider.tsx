@@ -9,6 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { BASE_PATH } from "@/lib/base-path";
 import { isNativeApp } from "@/lib/native";
 import { getSupabaseClient, isSupabaseConfigured } from "@/lib/supabase/client";
 
@@ -44,7 +45,7 @@ function authRedirect(path: string): string | undefined {
   // link de confirmação abriria no navegador externo. Sem uma URL pública
   // configurada, deixamos o Supabase usar a Site URL do projeto.
   if (isNativeApp()) return undefined;
-  return `${window.location.origin}${path.startsWith("/") ? path : `/${path}`}`;
+  return `${window.location.origin}${BASE_PATH}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 function translateAuthError(message: string): string {
