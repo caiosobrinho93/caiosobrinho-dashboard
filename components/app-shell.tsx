@@ -19,11 +19,10 @@ import { useAuth } from "@/components/auth-provider";
 import { BootScreen, useIntroDelay } from "@/components/boot-screen";
 import { CloudOverlay } from "@/components/cloud/cloud-overlay";
 import { CommandPalette } from "@/components/command-palette";
+import { MobileBubbleMenu } from "@/components/mobile-bubble-menu";
 import {
   isActivePath,
-  MOBILE_NAV,
   NAV_ITEMS,
-  SECONDARY_PATHS,
   SETTINGS_ITEM,
 } from "@/components/nav";
 import { stripBasePath, withBasePath } from "@/lib/base-path";
@@ -149,52 +148,6 @@ function ActivityBar({
       >
         <Settings size={19} strokeWidth={1.8} />
       </Link>
-    </nav>
-  );
-}
-
-function MobileNav({
-  pathname,
-  pendingTasks,
-  pendingShopping,
-}: {
-  pathname: string;
-  pendingTasks: number;
-  pendingShopping: number;
-}) {
-  return (
-    <nav className="mobile-nav" aria-label="Navegação principal">
-      {MOBILE_NAV.map((item) => {
-        const Icon = item.icon;
-        const isMore = item.href === "/mais";
-        const active = isMore
-          ? SECONDARY_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`))
-          : isActivePath(pathname, item.href);
-        const badge =
-          "badge" in item && item.badge === "tasks"
-            ? pendingTasks
-            : "badge" in item && item.badge === "shopping"
-              ? pendingShopping
-              : 0;
-
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`mobile-nav-item${active ? " active" : ""}`}
-            aria-label={badge > 0 ? `${item.label}, ${badge} em aberto` : item.label}
-            aria-current={active ? "page" : undefined}
-          >
-            <Icon size={20} strokeWidth={active ? 2 : 1.7} />
-            <span>{item.label}</span>
-            {badge > 0 ? (
-              <span className="mobile-nav-badge" aria-hidden="true">
-                {formatCount(badge)}
-              </span>
-            ) : null}
-          </Link>
-        );
-      })}
     </nav>
   );
 }
@@ -398,7 +351,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <StatusBar />
-      <MobileNav
+      <MobileBubbleMenu
         pathname={normalizedPath}
         pendingTasks={pendingTasks}
         pendingShopping={pendingShopping}

@@ -9,7 +9,8 @@ import {
 } from "@/lib/native";
 
 const HAPTIC_TARGETS = [
-  ".mobile-nav-item",
+  ".mobile-bubble-fab",
+  ".mobile-bubble-item",
   ".activity-item",
   ".quick-action",
   ".btn-primary",

@@ -5334,3 +5334,251 @@ input[type="number"]::-webkit-inner-spin-button {
     flex: 1;
   }
 }
+
+/* =========================================================
+   Mobile Floating Bubble Menu (Menu em Bolhas Arrastável)
+   ========================================================= */
+
+.mobile-nav {
+  display: none !important;
+}
+
+@media (max-width: 899px) {
+  .content {
+    padding-bottom: calc(50px + var(--safe-bottom)) !important;
+  }
+}
+
+.mobile-bubble-system {
+  display: block;
+}
+
+@media (min-width: 900px) {
+  .mobile-bubble-system {
+    display: none !important;
+  }
+}
+
+.mobile-bubble-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 850;
+  background: rgba(0, 0, 0, 0.58);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-bubble-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.mobile-bubble-orbit {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  z-index: 860;
+  pointer-events: none;
+  transition: transform 60ms linear;
+}
+
+.mobile-bubble-orbit.active {
+  pointer-events: auto;
+}
+
+.mobile-bubble-item {
+  position: absolute;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  background: #222223;
+  border: 1.5px solid #3c3c3c;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  color: var(--item-color, #ccc);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  transform: translate3d(-50%, -50%, 0) scale(0.05);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 220ms ease, opacity 180ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  will-change: transform, opacity;
+}
+
+.mobile-bubble-orbit.active .mobile-bubble-item {
+  transform: translate3d(calc(-50% + var(--target-x)), calc(-50% + var(--target-y)), 0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+  transition: transform 340ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms),
+              opacity 220ms ease var(--delay, 0ms),
+              border-color 150ms ease,
+              box-shadow 150ms ease;
+}
+
+.mobile-bubble-item:active {
+  transform: translate3d(calc(-50% + var(--target-x)), calc(-50% + var(--target-y)), 0) scale(1.15) !important;
+  border-color: var(--item-color, var(--accent)) !important;
+  box-shadow: 0 0 18px var(--item-color, var(--accent)) !important;
+}
+
+.mobile-bubble-item.current-route {
+  border-color: var(--accent);
+  background: #28282b;
+  box-shadow: 0 0 16px var(--accent-border), 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.mobile-bubble-item .bubble-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--item-color, var(--text));
+  transition: transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.mobile-bubble-item:hover .bubble-icon,
+.mobile-bubble-item:active .bubble-icon {
+  transform: scale(1.1);
+}
+
+.mobile-bubble-item .bubble-label {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: #ededed;
+  background: rgba(22, 22, 22, 0.94);
+  border: 1px solid #383838;
+  padding: 1.5px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.mobile-bubble-item .bubble-badge {
+  position: absolute;
+  top: -3px;
+  right: -3px;
+  min-width: 15px;
+  height: 15px;
+  border-radius: 8px;
+  background: var(--accent-strong);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 8px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.mobile-bubble-fab {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  z-index: 870;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 2px solid var(--accent);
+  background: linear-gradient(135deg, #2b2e30 0%, #1e1e1e 100%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55), 0 0 16px var(--accent-soft);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  transition: box-shadow 200ms ease, background 200ms ease, border-color 200ms ease;
+  will-change: transform;
+}
+
+.mobile-bubble-fab:active,
+.mobile-bubble-fab.is-dragging {
+  cursor: grabbing;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.7), 0 0 24px var(--accent-soft);
+  filter: brightness(1.1);
+}
+
+.mobile-bubble-fab.is-open {
+  background: var(--bg-deep);
+  border-color: #f48771;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.65), 0 0 16px rgba(244, 135, 113, 0.35);
+}
+
+.mobile-bubble-fab .fab-icon-box {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-bubble-fab .fab-icon {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 200ms ease;
+}
+
+.mobile-bubble-fab .fab-menu {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.mobile-bubble-fab .fab-menu.hidden {
+  opacity: 0;
+  transform: rotate(90deg) scale(0.4);
+}
+
+.mobile-bubble-fab .fab-close {
+  color: #f48771;
+  opacity: 0;
+  transform: rotate(-90deg) scale(0.4);
+  pointer-events: none;
+}
+
+.mobile-bubble-fab .fab-close.visible {
+  opacity: 1;
+  transform: rotate(0deg) scale(1);
+}
+
+.mobile-bubble-fab .fab-badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  min-width: 16px;
+  height: 16px;
+  border-radius: 9px;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 3px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
