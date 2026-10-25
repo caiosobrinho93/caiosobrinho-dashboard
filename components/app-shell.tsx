@@ -46,7 +46,7 @@ const TITLES: Record<string, string> = {
   "/redefinir-senha": "Redefinir senha",
 };
 
-const AUTH_PATHS = ["/entrar", "/criar-conta", "/recuperar-senha", "/redefinir-senha"];
+export const AUTH_PATHS = ["/entrar", "/criar-conta", "/recuperar-senha", "/redefinir-senha"];
 
 function formatCount(count: number): string {
   return count > 9 ? "9+" : String(count);

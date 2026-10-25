@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { AuthProvider, useAuth } from "@/components/auth-provider";
 import { NativeBridge } from "@/components/native-bridge";
 import { StoreProvider } from "@/lib/store";
-import { AUTH_PATHS } from "@/components/nav";
+import { AUTH_PATHS } from "@/components/app-shell";
 import { usePathname } from "next/navigation";
 
 import { useEffect } from "react";
