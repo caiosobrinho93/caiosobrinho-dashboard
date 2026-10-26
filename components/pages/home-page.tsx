@@ -19,7 +19,6 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
-import { OrbitMark } from "@/components/orbit-mark";
 import { useMemo, useState } from "react";
 import { DonutChart, DonutLegend } from "@/components/charts/donut-chart";
 import { TransactionFormModal } from "@/components/finance/transaction-form";
@@ -31,7 +30,6 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Panel } from "@/components/ui/panel";
 import { useAuth } from "@/components/auth-provider";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { hapticTap } from "@/lib/native";
 import { useStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
@@ -98,30 +96,51 @@ export function HomePage() {
   const month = monthKey(now);
   const previousMonth = monthKey(addMonths(now, -1));
 
-  const pendingTasks = useMemo(() => data.tasks.filter((task) => !task.done), [data.tasks]);
-  const doneToday = useMemo(() => data.tasks.filter(isDoneToday).length, [data.tasks]);
+  const pendingTasks = useMemo(
+    () => data.tasks.filter((task) => !task.done),
+    [data.tasks],
+  );
+  const doneToday = useMemo(
+    () => data.tasks.filter(isDoneToday).length,
+    [data.tasks],
+  );
   const totalTasks = useMemo(() => data.tasks.length, [data.tasks]);
-  const doneTasks = useMemo(() => data.tasks.filter((task) => task.done).length, [data.tasks]);
+  const doneTasks = useMemo(
+    () => data.tasks.filter((task) => task.done).length,
+    [data.tasks],
+  );
   const taskProgress = useMemo(
     () => (totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0),
     [doneTasks, totalTasks],
   );
-  const topTasks = useMemo(() => sortTasks(pendingTasks).slice(0, 4), [pendingTasks]);
+  const topTasks = useMemo(
+    () => sortTasks(pendingTasks).slice(0, 4),
+    [pendingTasks],
+  );
 
   const monthTransactions = useMemo(
-    () => data.transactions.filter((transaction) => transaction.date.slice(0, 7) === month),
+    () =>
+      data.transactions.filter(
+        (transaction) => transaction.date.slice(0, 7) === month,
+      ),
     [data.transactions, month],
   );
   const previousTransactions = useMemo(
     () =>
-      data.transactions.filter((transaction) => transaction.date.slice(0, 7) === previousMonth),
+      data.transactions.filter(
+        (transaction) => transaction.date.slice(0, 7) === previousMonth,
+      ),
     [data.transactions, previousMonth],
   );
   const income = sum(
-    monthTransactions.filter((transaction) => transaction.type === "receita").map((t) => t.amount),
+    monthTransactions
+      .filter((transaction) => transaction.type === "receita")
+      .map((t) => t.amount),
   );
   const expenses = sum(
-    monthTransactions.filter((transaction) => transaction.type === "despesa").map((t) => t.amount),
+    monthTransactions
+      .filter((transaction) => transaction.type === "despesa")
+      .map((t) => t.amount),
   );
   const balance = income - expenses;
   const previousExpenses = sum(
@@ -130,20 +149,28 @@ export function HomePage() {
       .map((t) => t.amount),
   );
   const expenseDelta =
-    previousExpenses > 0 ? Math.round(((expenses - previousExpenses) / previousExpenses) * 100) : null;
+    previousExpenses > 0
+      ? Math.round(((expenses - previousExpenses) / previousExpenses) * 100)
+      : null;
 
   const expenseSlices = useMemo(() => {
     const grouped = new Map<string, number>();
     for (const transaction of monthTransactions) {
       if (transaction.type !== "despesa") continue;
-      grouped.set(transaction.category, (grouped.get(transaction.category) ?? 0) + transaction.amount);
+      grouped.set(
+        transaction.category,
+        (grouped.get(transaction.category) ?? 0) + transaction.amount,
+      );
     }
     return [...grouped.entries()]
       .sort((a, b) => b[1] - a[1])
       .map(([label, value]) => ({ label, value, color: categoryColor(label) }));
   }, [monthTransactions]);
 
-  const pendingShopping = useMemo(() => data.shopping.filter((item) => !item.done), [data.shopping]);
+  const pendingShopping = useMemo(
+    () => data.shopping.filter((item) => !item.done),
+    [data.shopping],
+  );
   const shoppingEstimate = useMemo(
     () => sum(pendingShopping.map((item) => (item.price ?? 0) * item.quantity)),
     [pendingShopping],
@@ -159,7 +186,10 @@ export function HomePage() {
   const goalsAverage = useMemo(
     () =>
       goals.length > 0
-        ? Math.round(sum(goals.map((goal) => percent(goal.current, goal.target))) / goals.length)
+        ? Math.round(
+            sum(goals.map((goal) => percent(goal.current, goal.target))) /
+              goals.length,
+          )
         : 0,
     [goals],
   );
@@ -169,58 +199,95 @@ export function HomePage() {
   );
 
   const closeModal = () => setModal(null);
-  const taskBeingEdited = modal?.type === "task" ? modal.task ?? null : null;
+  const taskBeingEdited = modal?.type === "task" ? (modal.task ?? null) : null;
 
   return (
-    <div className="page">
-      <header className="home-hero">
-        <div className="orbit-hero-label"><span /> SEU UNIVERSO, EM ORDEM <span className="orbit-edition">PERSONAL SPACE / 01</span></div>
-        <div className="orbit-hero-copy">
-        <div className="home-hero-top">
-          <Breadcrumb segments={[{ label: "inicio.tsx" }]} />
+    <div className="page home-page">
+      <header className="home-heading">
+        <div>
+          <span className="section-kicker">VISÃO GERAL</span>
+          <h1 className="home-title">
+            {greeting}, <span className="name">{firstName}.</span>
+          </h1>
+          <p className="home-subtitle">
+            Seu dia tem espaço para o que importa.
+          </p>
+        </div>
+        <div className="home-heading-actions">
+          <span className="heading-date">
+            <CalendarDays size={14} />
+            {formatDateLong()}
+          </span>
           <button
             type="button"
-            className={`home-refresh-chip${refreshing ? " refreshing" : ""}`}
-            onClick={handleRefresh}
-            disabled={refreshing}
-            aria-label="Atualizar dados do feed"
-            title="Atualizar dados e sincronizar"
+            className="btn btn-primary"
+            onClick={() => setModal({ type: "task" })}
           >
-            <RefreshCw size={12} className={refreshing ? "spin" : ""} />
-            <span>{refreshing ? "Atualizando..." : "Atualizar"}</span>
+            <Plus size={16} />
+            Criar tarefa
           </button>
         </div>
-        <h1 className="home-title">
-          <span>{greeting},</span>
-          <span className="name">{firstName}.</span>
-          <span className="caret" aria-hidden="true" />
-        </h1>
-        <p className="home-date">
-          <CalendarDays
-            size={12}
-            style={{ display: "inline", verticalAlign: "-1px", marginRight: 5 }}
-          />
-          {formatDateLong()}
-          <span className="mono"> · {pluralize(pendingTasks.length, "pendência", "pendências")} no radar</span>
-        </p>
-        <div className="orbit-hero-footer">
-          <Link href="/tarefas" className="orbit-focus-link">Explorar meu dia <ChevronRight size={16} /></Link>
-          <span>{taskProgress}% das tarefas concluídas</span>
-        </div>
-        </div>
-        <OrbitMark />
       </header>
+
+      <section className="focus-card" aria-label="Foco e progresso das tarefas">
+        <div className="focus-progress">
+          <svg viewBox="0 0 88 88" aria-hidden="true">
+            <circle cx="44" cy="44" r="36" className="focus-track" />
+            <circle
+              cx="44"
+              cy="44"
+              r="36"
+              pathLength="100"
+              strokeDasharray={`${taskProgress} 100`}
+              className="focus-fill"
+            />
+          </svg>
+          <strong>
+            {taskProgress}
+            <small>%</small>
+          </strong>
+        </div>
+        <div className="focus-copy">
+          <span className="section-kicker">
+            {topTasks.length ? "SEU PRÓXIMO PASSO" : "UM POUCO DE ESPAÇO LIVRE"}
+          </span>
+          <h2>{topTasks[0]?.title ?? "Tudo em dia. O próximo passo é seu."}</h2>
+          <p>
+            {doneTasks} de {totalTasks} tarefas concluídas <span>·</span>{" "}
+            {pluralize(
+              pendingTasks.length,
+              "tarefa em aberto",
+              "tarefas em aberto",
+            )}
+          </p>
+        </div>
+        <Link href="/tarefas" className="focus-link">
+          Ver minhas tarefas <ChevronRight size={16} />
+        </Link>
+        <div className="focus-decoration" aria-hidden="true">
+          <i />
+          <i />
+          <i />
+          <i />
+          <i />
+        </div>
+      </section>
 
       {!data.settings.demoBannerDismissed ? (
         <div className="demo-banner">
           <Info size={15} />
           <div className="demo-banner-content">
             <p>
-              <strong>Modo demonstração.</strong> Estes dados são exemplos para você explorar o
-              dashboard. Tudo que você criar fica salvo neste navegador.
+              <strong>Modo demonstração.</strong> Estes dados são exemplos para
+              você explorar o dashboard. Tudo que você criar fica salvo neste
+              navegador.
             </p>
             <div className="demo-banner-actions">
-              <button type="button" className="link-btn" onClick={() => setConfirmClear(true)}>
+              <button
+                type="button"
+                className="link-btn"
+                onClick={() => setConfirmClear(true)}
+              >
                 Começar do zero
               </button>
               <span className="muted" style={{ fontSize: 10 }}>
@@ -247,8 +314,12 @@ export function HomePage() {
           disabled={refreshing}
           title="Atualizar feed e dados"
         >
-          <RefreshCw size={14} className={refreshing ? "spin" : ""} style={{ color: "var(--teal)" }} />
-          Atualizar feed
+          <RefreshCw
+            size={14}
+            className={refreshing ? "spin" : ""}
+            style={{ color: "var(--teal)" }}
+          />
+          Atualizar
         </button>
         <button
           type="button"
@@ -285,7 +356,11 @@ export function HomePage() {
       </div>
 
       <div className="stats-grid">
-        <Link href="/tarefas" className="stat-card" style={{ "--stat-color": "var(--yellow)" } as React.CSSProperties}>
+        <Link
+          href="/tarefas"
+          className="stat-card"
+          style={{ "--stat-color": "var(--yellow)" } as React.CSSProperties}
+        >
           <div className="stat-top">
             <span className="stat-label">Tarefas abertas</span>
             <span className="stat-icon">
@@ -296,7 +371,8 @@ export function HomePage() {
           <span className="stat-meta">
             {doneToday > 0 ? (
               <>
-                <span className="positive">{doneToday}</span> concluída{doneToday === 1 ? "" : "s"} hoje
+                <span className="positive">{doneToday}</span> concluída
+                {doneToday === 1 ? "" : "s"} hoje
               </>
             ) : (
               "nada concluído hoje"
@@ -304,20 +380,32 @@ export function HomePage() {
           </span>
         </Link>
 
-        <Link href="/financas" className="stat-card" style={{ "--stat-color": "var(--teal)" } as React.CSSProperties}>
+        <Link
+          href="/financas"
+          className="stat-card"
+          style={{ "--stat-color": "var(--teal)" } as React.CSSProperties}
+        >
           <div className="stat-top">
             <span className="stat-label">Saldo do mês</span>
             <span className="stat-icon">
               <Wallet size={13} />
             </span>
           </div>
-          <strong className={`stat-value small ${balance >= 0 ? "positive" : "negative"}`}>
+          <strong
+            className={`stat-value small ${balance >= 0 ? "positive" : "negative"}`}
+          >
             {formatCurrency(balance)}
           </strong>
-          <span className="stat-meta">{formatCurrency(expenses)} em gastos</span>
+          <span className="stat-meta">
+            {formatCurrency(expenses)} em gastos
+          </span>
         </Link>
 
-        <Link href="/compras" className="stat-card" style={{ "--stat-color": "var(--green)" } as React.CSSProperties}>
+        <Link
+          href="/compras"
+          className="stat-card"
+          style={{ "--stat-color": "var(--green)" } as React.CSSProperties}
+        >
           <div className="stat-top">
             <span className="stat-label">Lista de compras</span>
             <span className="stat-icon">
@@ -332,7 +420,11 @@ export function HomePage() {
           </span>
         </Link>
 
-        <Link href="/metas" className="stat-card" style={{ "--stat-color": "var(--orange)" } as React.CSSProperties}>
+        <Link
+          href="/metas"
+          className="stat-card"
+          style={{ "--stat-color": "var(--orange)" } as React.CSSProperties}
+        >
           <div className="stat-top">
             <span className="stat-label">Progresso das metas</span>
             <span className="stat-icon">
@@ -362,7 +454,9 @@ export function HomePage() {
             footer={
               totalTasks > 0 ? (
                 <>
-                  <span>{doneToday} concluída{doneToday === 1 ? "" : "s"} hoje</span>
+                  <span>
+                    {doneToday} concluída{doneToday === 1 ? "" : "s"} hoje
+                  </span>
                   <Link href="/tarefas" className="link-btn">
                     Abrir tarefas <ChevronRight size={11} />
                   </Link>
@@ -382,7 +476,9 @@ export function HomePage() {
                     key={task.id}
                     task={task}
                     onToggle={toggleTask}
-                    onEdit={(selected) => setModal({ type: "task", task: selected })}
+                    onEdit={(selected) =>
+                      setModal({ type: "task", task: selected })
+                    }
                     showChevron
                   />
                 ))}
@@ -421,9 +517,17 @@ export function HomePage() {
                 {expenseDelta != null && expenses > 0 ? (
                   <span
                     className={expenseDelta <= 0 ? "positive" : "negative"}
-                    style={{ display: "inline-flex", alignItems: "center", gap: 4 }}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
                   >
-                    {expenseDelta <= 0 ? <TrendingDown size={11} /> : <TrendingUp size={11} />}
+                    {expenseDelta <= 0 ? (
+                      <TrendingDown size={11} />
+                    ) : (
+                      <TrendingUp size={11} />
+                    )}
                     {Math.abs(expenseDelta)}% vs. mês anterior
                   </span>
                 ) : (
@@ -450,7 +554,10 @@ export function HomePage() {
                 title="Sem gastos neste mês"
                 text="Quando você lançar despesas, a distribuição por categoria aparece aqui."
                 action={
-                  <Link className="btn btn-sm btn-secondary" href="/financas#nova">
+                  <Link
+                    className="btn btn-sm btn-secondary"
+                    href="/financas#nova"
+                  >
                     <Plus size={12} /> Lançar gasto
                   </Link>
                 }
@@ -462,7 +569,9 @@ export function HomePage() {
         <div className="col-7">
           <Panel
             title="Metas"
-            subtitle={goals.length > 0 ? `${goals.length} ativas` : "primeiro passo"}
+            subtitle={
+              goals.length > 0 ? `${goals.length} ativas` : "primeiro passo"
+            }
             dotColor="var(--orange)"
             action={
               <Link href="/metas" className="panel-action">
@@ -483,18 +592,23 @@ export function HomePage() {
             {goals.length > 0 ? (
               <div className="goal-mini-list">
                 {goals.slice(0, 3).map((goal) => {
-                  const progress = Math.round(percent(goal.current, goal.target));
+                  const progress = Math.round(
+                    percent(goal.current, goal.target),
+                  );
                   return (
                     <Link
                       key={goal.id}
                       className="goal-mini"
                       href="/metas"
-                      style={{ "--goal-color": goal.color } as React.CSSProperties}
+                      style={
+                        { "--goal-color": goal.color } as React.CSSProperties
+                      }
                     >
                       <div className="goal-mini-top">
                         <span className="goal-mini-title">{goal.title}</span>
                         <span className="goal-mini-meta">
-                          {progress}% · {formatGoalValue(goal.current, goal.unit)}
+                          {progress}% ·{" "}
+                          {formatGoalValue(goal.current, goal.unit)}
                         </span>
                       </div>
                       <div className="progress-goal">
@@ -522,7 +636,11 @@ export function HomePage() {
         <div className="col-5">
           <Panel
             title="Compras"
-            subtitle={pendingShopping.length > 0 ? pluralize(pendingShopping.length, "item", "itens") : "tudo comprado"}
+            subtitle={
+              pendingShopping.length > 0
+                ? pluralize(pendingShopping.length, "item", "itens")
+                : "tudo comprado"
+            }
             dotColor="var(--green)"
             action={
               <Link href="/compras" className="panel-action">
@@ -556,12 +674,23 @@ export function HomePage() {
                     <div className="shop-main">
                       <span className="shop-name">{item.name}</span>
                       <span className="shop-details">
-                        <span className="cat-dot" style={{ "--cat-color": SHOPPING_CATEGORY_COLORS[item.category] } as React.CSSProperties} />
-                        {item.quantity.toLocaleString("pt-BR")} {item.unit} · {item.category}
+                        <span
+                          className="cat-dot"
+                          style={
+                            {
+                              "--cat-color":
+                                SHOPPING_CATEGORY_COLORS[item.category],
+                            } as React.CSSProperties
+                          }
+                        />
+                        {item.quantity.toLocaleString("pt-BR")} {item.unit} ·{" "}
+                        {item.category}
                       </span>
                     </div>
                     <span className="shop-price">
-                      {item.price != null ? formatCurrency(item.price * item.quantity) : "—"}
+                      {item.price != null
+                        ? formatCurrency(item.price * item.quantity)
+                        : "—"}
                     </span>
                   </div>
                 ))}
@@ -572,7 +701,10 @@ export function HomePage() {
                 title="Lista vazia"
                 text="Adicione o que falta na despensa e marque no mercado."
                 action={
-                  <Link className="btn btn-sm btn-secondary" href="/compras#nova">
+                  <Link
+                    className="btn btn-sm btn-secondary"
+                    href="/compras#nova"
+                  >
                     <Plus size={12} /> Adicionar item
                   </Link>
                 }
@@ -603,16 +735,27 @@ export function HomePage() {
                     rel="noreferrer noopener"
                   >
                     <span className="music-art">
-                      {item.kind === "video" ? <Video size={16} /> : <Music2 size={16} />}
+                      {item.kind === "video" ? (
+                        <Video size={16} />
+                      ) : (
+                        <Music2 size={16} />
+                      )}
                     </span>
                     <span className="music-info">
                       <span className="music-title">{item.title}</span>
                       <span className="music-sub">
-                        {getDomain(item.url)} · {formatRelativeTime(item.createdAt)}
-                        {item.tags.length > 0 ? ` · ${item.tags.slice(0, 2).join(" · ")}` : ""}
+                        {getDomain(item.url)} ·{" "}
+                        {formatRelativeTime(item.createdAt)}
+                        {item.tags.length > 0
+                          ? ` · ${item.tags.slice(0, 2).join(" · ")}`
+                          : ""}
                       </span>
                     </span>
-                    <ExternalLink size={13} className="muted" style={{ flex: "none" }} />
+                    <ExternalLink
+                      size={13}
+                      className="muted"
+                      style={{ flex: "none" }}
+                    />
                   </a>
                 ))}
               </div>

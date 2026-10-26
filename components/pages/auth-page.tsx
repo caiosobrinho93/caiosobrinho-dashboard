@@ -5,6 +5,9 @@ import {
   ArrowRight,
   CheckCircle2,
   Cloud,
+  ListTodo,
+  Target,
+  Wallet,
   Eye,
   EyeOff,
   Info,
@@ -16,7 +19,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
-import { OrbitMark } from "@/components/orbit-mark";
+import { BrandMark } from "@/components/brand-mark";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-provider";
@@ -26,10 +29,13 @@ export type AuthMode = "login" | "signup" | "recover" | "reset";
 
 type Feedback = { tone: "error" | "success" | "info"; message: string };
 
-const TITLES: Record<AuthMode, { eyebrow: string; title: string; subtitle: string }> = {
+const TITLES: Record<
+  AuthMode,
+  { eyebrow: string; title: string; subtitle: string }
+> = {
   login: {
-    eyebrow: "Acesse sua conta",
-    title: "Entrar no dashboard",
+    eyebrow: "ACESSO AO SEU ESPAÇO",
+    title: "Bom ter você aqui.",
     subtitle: "Sincronize tarefas, finanças e metas entre seus dispositivos.",
   },
   signup: {
@@ -52,14 +58,83 @@ const TITLES: Record<AuthMode, { eyebrow: string; title: string; subtitle: strin
 function AuthBrand() {
   return (
     <div className="auth-brand">
-      <div className="orbit-wordmark"><span className="orbit-logo" aria-hidden="true">◉</span> ORBIT <span> / dashboard pessoal</span></div>
-      <OrbitMark />
-      <div className="orbit-auth-copy">
-        <span className="orbit-kicker">MENOS RUÍDO. MAIS ESPAÇO.</span>
-        <p>Seu universo.<br /><em>Em equilíbrio.</em></p>
-        <span>Tarefas, planos e conquistas.<br />Tudo gravita em torno de você.</span>
+      <Link href="/" className="auth-wordmark">
+        <BrandMark />
+        <span>
+          dashboard<span>pessoal</span>
+        </span>
+      </Link>
+      <div className="auth-editorial">
+        <span className="section-kicker">
+          <i /> SUA VIDA, BEM ORGANIZADA
+        </span>
+        <p>
+          Menos dispersão.
+          <br />
+          Mais <em>direção.</em>
+        </p>
+        <span className="auth-brand-description">
+          Um espaço para suas tarefas, suas finanças
+          <br className="desktop-break" /> e tudo o que você quer conquistar.
+        </span>
       </div>
-      <div className="orbit-auth-foot"><span /> UM NOVO OLHAR PARA O SEU DIA</div>
+      <div
+        className="product-preview"
+        aria-label="Prévia das áreas do dashboard"
+      >
+        <div className="preview-topline">
+          <span className="preview-tag">SEU ESPAÇO PESSOAL</span>
+          <span className="preview-lights" aria-hidden="true">
+            <i />
+            <i />
+            <i />
+          </span>
+        </div>
+        <div className="preview-heading">
+          <strong>Tudo no lugar.</strong>
+          <span>Mais clareza para o próximo passo.</span>
+        </div>
+        <div className="preview-modules">
+          <div>
+            <span className="preview-icon">
+              <ListTodo size={20} />
+            </span>
+            <strong>Tarefas</strong>
+            <span>Priorize o que importa.</span>
+            <div className="preview-lines" aria-hidden="true">
+              <i />
+              <i />
+              <i />
+            </div>
+          </div>
+          <div>
+            <span className="preview-icon">
+              <Wallet size={20} />
+            </span>
+            <strong>Finanças</strong>
+            <span>Enxergue cada escolha.</span>
+            <div className="preview-bars" aria-hidden="true">
+              {[24, 45, 34, 65, 50, 80, 70].map((height, i) => (
+                <i key={i} style={{ height: `${height}%` }} />
+              ))}
+            </div>
+          </div>
+          <div>
+            <span className="preview-icon">
+              <Target size={20} />
+            </span>
+            <strong>Metas</strong>
+            <span>Dê forma aos planos.</span>
+            <div className="preview-goal" aria-hidden="true">
+              <span />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="auth-brand-bottom">
+        <span>PLANEJE. ORGANIZE. CONQUISTE.</span>
+        <span>Seu próximo passo começa aqui.</span>
+      </div>
     </div>
   );
 }
@@ -151,8 +226,9 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
             <span className="auth-eyebrow">Nuvem não configurada</span>
             <h1>O modo local já está funcionando</h1>
             <p className="auth-subtitle">
-              Para ativar login e sincronização, preencha as variáveis públicas do Supabase no
-              ambiente de build. Nenhuma chave secreta deve ir para o navegador.
+              Para ativar login e sincronização, preencha as variáveis públicas
+              do Supabase no ambiente de build. Nenhuma chave secreta deve ir
+              para o navegador.
             </p>
             <pre className="auth-code">
               <code>
@@ -160,8 +236,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               </code>
             </pre>
             <p className="auth-hint">
-              No desenvolvimento, use <code>.env.local</code>. Na Vercel, cadastre as mesmas
-              variáveis em <strong>Settings → Environment Variables</strong> e gere um novo deploy.
+              No desenvolvimento, use <code>.env.local</code>. Na Vercel,
+              cadastre as mesmas variáveis em{" "}
+              <strong>Settings → Environment Variables</strong> e gere um novo
+              deploy.
             </p>
             <Link className="btn btn-primary btn-block" href="/">
               Continuar no modo local
@@ -205,11 +283,17 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     setFeedback(null);
 
     if (!name.trim()) {
-      setFeedback({ tone: "error", message: "Informe seu nome para criar a conta." });
+      setFeedback({
+        tone: "error",
+        message: "Informe seu nome para criar a conta.",
+      });
       return;
     }
     if (password.length < 8) {
-      setFeedback({ tone: "error", message: "Use pelo menos 8 caracteres na senha." });
+      setFeedback({
+        tone: "error",
+        message: "Use pelo menos 8 caracteres na senha.",
+      });
       return;
     }
     if (password !== confirmPassword) {
@@ -256,7 +340,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
     event.preventDefault();
     setFeedback(null);
     if (password.length < 8) {
-      setFeedback({ tone: "error", message: "Use pelo menos 8 caracteres na senha." });
+      setFeedback({
+        tone: "error",
+        message: "Use pelo menos 8 caracteres na senha.",
+      });
       return;
     }
     if (password !== confirmPassword) {
@@ -290,7 +377,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
         ? await resetPassword(email)
         : await resendConfirmation(email);
     setBusy(false);
-    setFeedback({ tone: result.ok ? "success" : "error", message: result.message });
+    setFeedback({
+      tone: result.ok ? "success" : "error",
+      message: result.message,
+    });
   };
 
   const handleSignOut = async () => {
@@ -320,7 +410,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
 
     const result = await signOut();
     setSigningOut(false);
-    setFeedback({ tone: result.ok ? "success" : "error", message: result.message });
+    setFeedback({
+      tone: result.ok ? "success" : "error",
+      message: result.message,
+    });
   };
 
   return (
@@ -342,8 +435,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               <span className="auth-eyebrow">Sessão ativa</span>
               <h1>Você já está conectado</h1>
               <p className="auth-subtitle">
-                A conta <strong>{user?.email}</strong> está pronta para sincronizar. Abra o
-                dashboard para carregar seus dados.
+                A conta <strong>{user?.email}</strong> está pronta para
+                sincronizar. Abra o dashboard para carregar seus dados.
               </p>
               <Link className="btn btn-primary btn-block" href="/">
                 Abrir dashboard
@@ -355,7 +448,9 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                 onClick={() => void handleSignOut()}
                 disabled={signingOut}
               >
-                {signingOut ? <LoaderCircle className="spin" size={15} /> : null}
+                {signingOut ? (
+                  <LoaderCircle className="spin" size={15} />
+                ) : null}
                 Sair desta conta
               </button>
             </div>
@@ -368,7 +463,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                 <span className="auth-eyebrow">Tudo certo</span>
                 <h1>Senha atualizada</h1>
                 <p className="auth-subtitle">
-                  Use a nova senha na próxima vez que entrar. Sua sessão atual continua ativa.
+                  Use a nova senha na próxima vez que entrar. Sua sessão atual
+                  continua ativa.
                 </p>
                 <Link className="btn btn-primary btn-block" href="/">
                   Abrir dashboard
@@ -389,16 +485,22 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                     <div className="auth-note is-warning">
                       <TriangleAlert size={16} />
                       <span>
-                        Este link expirou ou a sessão de recuperação não foi encontrada. Solicite um
-                        novo link para continuar.
+                        Este link expirou ou a sessão de recuperação não foi
+                        encontrada. Solicite um novo link para continuar.
                       </span>
                     </div>
-                    <Link className="btn btn-primary btn-block" href="/recuperar-senha">
+                    <Link
+                      className="btn btn-primary btn-block"
+                      href="/recuperar-senha"
+                    >
                       Pedir novo link
                     </Link>
                   </div>
                 ) : (
-                  <form className="auth-form" onSubmit={(event) => void submitReset(event)}>
+                  <form
+                    className="auth-form"
+                    onSubmit={(event) => void submitReset(event)}
+                  >
                     <PasswordField
                       id="new-password"
                       label="Nova senha"
@@ -415,8 +517,16 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                       placeholder="Repita a nova senha"
                     />
                     {feedback ? <AuthFeedback feedback={feedback} /> : null}
-                    <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-                      {busy ? <LoaderCircle className="spin" size={15} /> : <ShieldCheck size={15} />}
+                    <button
+                      className="btn btn-primary btn-block"
+                      type="submit"
+                      disabled={busy}
+                    >
+                      {busy ? (
+                        <LoaderCircle className="spin" size={15} />
+                      ) : (
+                        <ShieldCheck size={15} />
+                      )}
                       Salvar nova senha
                     </button>
                   </form>
@@ -429,10 +539,15 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                 <Mail size={24} />
               </span>
               <span className="auth-eyebrow">Verifique seu e-mail</span>
-              <h1>{mode === "recover" ? "Link de recuperação enviado" : "Confirme seu cadastro"}</h1>
+              <h1>
+                {mode === "recover"
+                  ? "Link de recuperação enviado"
+                  : "Confirme seu cadastro"}
+              </h1>
               <p className="auth-subtitle">
-                Enviamos as instruções para <strong>{email}</strong>. Abra o link no mesmo
-                dispositivo ou em outro navegador. Confira também a pasta de spam.
+                Enviamos as instruções para <strong>{email}</strong>. Abra o
+                link no mesmo dispositivo ou em outro navegador. Confira também
+                a pasta de spam.
               </p>
               {feedback ? <AuthFeedback feedback={feedback} /> : null}
               <button
@@ -441,7 +556,11 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                 onClick={() => void resend()}
                 disabled={busy}
               >
-                {busy ? <LoaderCircle className="spin" size={15} /> : <Mail size={15} />}
+                {busy ? (
+                  <LoaderCircle className="spin" size={15} />
+                ) : (
+                  <Mail size={15} />
+                )}
                 Reenviar e-mail
               </button>
               <Link className="btn btn-ghost btn-block" href="/entrar">
@@ -464,7 +583,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               <p className="auth-subtitle">{copy.subtitle}</p>
 
               {mode === "login" ? (
-                <form className="auth-form" onSubmit={(event) => void submitLogin(event)}>
+                <form
+                  className="auth-form"
+                  onSubmit={(event) => void submitLogin(event)}
+                >
                   <div className="field">
                     <label className="label" htmlFor="login-email">
                       E-mail
@@ -493,8 +615,16 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                     <Link href="/recuperar-senha">Esqueci minha senha</Link>
                   </div>
                   {feedback ? <AuthFeedback feedback={feedback} /> : null}
-                  <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-                    {busy ? <LoaderCircle className="spin" size={15} /> : <ArrowRight size={15} />}
+                  <button
+                    className="btn btn-primary btn-block"
+                    type="submit"
+                    disabled={busy}
+                  >
+                    {busy ? (
+                      <LoaderCircle className="spin" size={15} />
+                    ) : (
+                      <ArrowRight size={15} />
+                    )}
                     Entrar
                   </button>
                   {feedback?.message.toLowerCase().includes("confirme") ? (
@@ -509,7 +639,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                   ) : null}
                 </form>
               ) : mode === "signup" ? (
-                <form className="auth-form" onSubmit={(event) => void submitSignup(event)}>
+                <form
+                  className="auth-form"
+                  onSubmit={(event) => void submitSignup(event)}
+                >
                   <div className="field">
                     <label className="label" htmlFor="signup-name">
                       Nome
@@ -558,7 +691,11 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                     placeholder="Repita a senha"
                   />
                   {feedback ? <AuthFeedback feedback={feedback} /> : null}
-                  <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
+                  <button
+                    className="btn btn-primary btn-block"
+                    type="submit"
+                    disabled={busy}
+                  >
                     {busy ? (
                       <LoaderCircle className="spin" size={15} />
                     ) : (
@@ -568,7 +705,10 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                   </button>
                 </form>
               ) : (
-                <form className="auth-form" onSubmit={(event) => void submitRecover(event)}>
+                <form
+                  className="auth-form"
+                  onSubmit={(event) => void submitRecover(event)}
+                >
                   <div className="field">
                     <label className="label" htmlFor="recover-email">
                       E-mail da conta
@@ -586,8 +726,16 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
                     />
                   </div>
                   {feedback ? <AuthFeedback feedback={feedback} /> : null}
-                  <button className="btn btn-primary btn-block" type="submit" disabled={busy}>
-                    {busy ? <LoaderCircle className="spin" size={15} /> : <Mail size={15} />}
+                  <button
+                    className="btn btn-primary btn-block"
+                    type="submit"
+                    disabled={busy}
+                  >
+                    {busy ? (
+                      <LoaderCircle className="spin" size={15} />
+                    ) : (
+                      <Mail size={15} />
+                    )}
                     Enviar link de recuperação
                   </button>
                 </form>
@@ -596,7 +744,8 @@ export function AuthPage({ mode }: { mode: AuthMode }) {
               <div className="auth-switch">
                 {mode === "login" ? (
                   <>
-                    Ainda não tem conta? <Link href="/criar-conta">Criar conta</Link>
+                    Ainda não tem conta?{" "}
+                    <Link href="/criar-conta">Criar conta</Link>
                   </>
                 ) : (
                   <>

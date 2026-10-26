@@ -16,7 +16,7 @@ Esta entrega pertence ao `caiosobrinho-dashboard`, publicado no GitHub Pages. O 
 
 ## Compatibilidade e limites
 
-Sem migração do banco ou alteração das chaves de armazenamento. O build continua estático, com o mesmo subcaminho do GitHub Pages e o mesmo fluxo Android. A entrega não inclui alteração do APK, redesign, novos projetos ou uma auditoria completa do mecanismo de sincronização. Testes locais não substituem a verificação de login e RLS com contas reais.
+Sem migração do banco ou alteração das chaves de armazenamento. O build continua estático, com o mesmo subcaminho do GitHub Pages e o mesmo fluxo Android. A entrega web não inclui alteração do APK ou uma auditoria completa do mecanismo de sincronização. Testes locais não substituem a verificação de login e RLS com contas reais.
 
 Publicação pelo workflow existente `.github/workflows/pages.yml`, acionado por push na main. As variáveis Supabase existentes permanecem nas configurações do GitHub; não devem ser copiadas para o repositório.
 
@@ -28,8 +28,17 @@ Publicação pelo workflow existente `.github/workflows/pages.yml`, acionado por
 - Testes de regressão cobrem limite de paginação, escopo de conta, falha de rede, cursor travado e versões de backup. Teste de navegador mobile cobre cancelar, rejeitar arquivo incompatível e confirmar restauração com persistência após recarregar.
 - Nenhuma migração do Supabase é necessária. A paginação foi validada com cliente simulado; não foram usados dados ou contas reais de produção.
 
-## Identidade visual Orbit
+## Revisão visual — grafite e prata
 
-Nova camada visual em `app/orbit.css`, com tokens compartilhados, tipografia, superfícies, botões, formulários, navegação e cartões. Login com composição orbital responsiva e tela inicial com saudação, progresso real de tarefas e acesso ao dia. Ilustração CSS sem recursos externos; animação desativada com movimento reduzido. Ícones web e tema da PWA atualizados. Nenhuma alteração do formato dos dados ou migração de banco.
+A identidade atual usa `app/design-system.css`, com fonte Manrope variável hospedada no próprio app (licença em `public/fonts/OFL-Manrope.txt`). A composição prioriza hierarquia tipográfica, superfícies neutras e detalhes de cor.
 
-Validação visual de login em 320, 390 e 1440 px, sem overflow horizontal; controles de senha e preferência de movimento reduzido conferidos. Testes mobile de CSV, navegação e restauração de backup preservados. O formulário de login foi inspecionado com configuração pública fictícia de teste, sem autenticação real; o deploy usa as variáveis existentes do GitHub. Corrigida também a tela inicial em modo local, que ainda mostrava o acesso à conta apesar da nuvem estar desativada.
+- Navegação desktop com nomes de seções, contagens e perfil.
+- Barra inferior mobile com destinos diretos e acesso às áreas secundárias em Mais.
+- Abertura com próxima tarefa e percentual calculado a partir dos registros reais.
+- Tela de conta com prévia das áreas do produto e formulário revisado.
+- Rodapé com estado real de sincronização, sem informações de código.
+- Ícones PWA coerentes com o novo símbolo.
+
+A revisão não modifica armazenamento, dados, políticas do banco nem autenticação. A publicação continua pelo GitHub Pages; o APK nativo não é regenerado nesta entrega.
+
+Verificação desta revisão: build estático e checagem TypeScript aprovados; 10 testes automatizados aprovados. Navegador em 320, 390, 768, 1024 e 1440 px validou navegação, carregamento da fonte, comandos de teclado e abertura de formulário. Em contexto local isolado, criar/concluir tarefa persistiu após recarregar; exportação financeira e importação/cancelamento de backup continuaram funcionando. Login inspecionado em 320, 390, 768 e 1440 px com configuração pública fictícia; não foi realizado login em conta real.

@@ -1,11 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Orbit — Dashboard pessoal">
-<defs><radialGradient id="space" cx=".3" cy=".2" r="1"><stop stop-color="#1c3545"/><stop offset="1" stop-color="#080f18"/></radialGradient><radialGradient id="planet" cx=".28" cy=".2" r=".9"><stop stop-color="#d4ffff"/><stop offset=".25" stop-color="#7bcbd5"/><stop offset=".6" stop-color="#245367"/><stop offset="1" stop-color="#081522"/></radialGradient></defs>
-<rect width="512" height="512" rx="112" fill="url(#space)"/>
-<circle cx="256" cy="256" r="168" fill="none" stroke="#7bd6e2" stroke-opacity=".12"/>
-<ellipse cx="256" cy="256" rx="180" ry="72" fill="none" stroke="#80dfed" stroke-width="3" transform="rotate(-30 256 256)"/>
-<circle cx="256" cy="256" r="104" fill="url(#planet)"/>
-<ellipse cx="256" cy="256" rx="104" ry="36" fill="none" stroke="#a7e9eb" stroke-opacity=".3" transform="rotate(-30 256 256)"/>
-<ellipse cx="256" cy="256" rx="38" ry="104" fill="none" stroke="#a7e9eb" stroke-opacity=".25" transform="rotate(-30 256 256)"/>
-<path d="M100 346 Q236 330 412 166" stroke="#bcebf0" stroke-width="3" fill="none"/>
-<circle cx="387" cy="157" r="11" fill="#b9ef93"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Dashboard pessoal">
+  <rect width="512" height="512" rx="112" fill="#101114"/>
+  <rect x="136" y="136" width="106" height="106" rx="8" fill="#ebedf2"/>
+  <rect x="270" y="136" width="106" height="106" rx="8" fill="#ebedf2"/>
+  <rect x="136" y="270" width="106" height="106" rx="8" fill="#ebedf2"/>
+  <rect x="270" y="270" width="106" height="106" rx="8" fill="#adbbff"/>
 </svg>

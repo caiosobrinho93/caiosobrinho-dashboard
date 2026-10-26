@@ -3,9 +3,7 @@
 import { App as CapacitorApp } from "@capacitor/app";
 import {
   Check,
-  CircleCheck,
   Cloud,
-  GitBranch,
   RefreshCw,
   Search,
   Settings,
@@ -19,10 +17,12 @@ import { useAuth } from "@/components/auth-provider";
 import { BootScreen, useIntroDelay } from "@/components/boot-screen";
 import { CloudOverlay } from "@/components/cloud/cloud-overlay";
 import { CommandPalette } from "@/components/command-palette";
-import { MobileBubbleMenu } from "@/components/mobile-bubble-menu";
+import { BrandMark } from "@/components/brand-mark";
 import {
   isActivePath,
   NAV_ITEMS,
+  MOBILE_NAV,
+  SECONDARY_PATHS,
   SETTINGS_ITEM,
 } from "@/components/nav";
 import { stripBasePath } from "@/lib/base-path";
@@ -45,7 +45,12 @@ const TITLES: Record<string, string> = {
   "/redefinir-senha": "Redefinir senha",
 };
 
-export const AUTH_PATHS = ["/entrar", "/criar-conta", "/recuperar-senha", "/redefinir-senha"];
+export const AUTH_PATHS = [
+  "/entrar",
+  "/criar-conta",
+  "/recuperar-senha",
+  "/redefinir-senha",
+];
 
 function formatCount(count: number): string {
   return count > 9 ? "9+" : String(count);
@@ -63,7 +68,12 @@ function TitleBar({
   return (
     <header className="titlebar">
       <div className="titlebar-left">
-        <span className="titlebar-title"><span className="orbit-logo" aria-hidden="true">◉</span> ORBIT <span className="orbit-shell-caption"> / espaço pessoal</span></span>
+        <Link href="/" className="titlebar-title">
+          <BrandMark />
+          <span>
+            dashboard<span className="brand-suffix">pessoal</span>
+          </span>
+        </Link>
       </div>
 
       <button
@@ -71,8 +81,8 @@ function TitleBar({
         className="titlebar-command"
         onClick={onOpenPalette}
       >
-        <Search size={12} />
-        <span className="command-text">Buscar ou executar comando...</span>
+        <Search size={16} />
+        <span className="command-text">O que você está procurando?</span>
         <span className="kbd">Ctrl K</span>
       </button>
 
@@ -98,7 +108,11 @@ function TitleBar({
             {refreshing ? "Atualizando..." : "Atualizar"}
           </span>
         </button>
-        <Link className="icon-btn" href="/configuracoes" aria-label="Configurações">
+        <Link
+          className="icon-btn"
+          href="/configuracoes"
+          aria-label="Configurações"
+        >
           <Settings size={16} />
         </Link>
       </div>
@@ -110,16 +124,25 @@ function ActivityBar({
   pathname,
   pendingTasks,
   pendingShopping,
+  name,
 }: {
   pathname: string;
   pendingTasks: number;
   pendingShopping: number;
+  name: string;
 }) {
   return (
     <nav className="activity-bar" aria-label="Navegação do workspace">
-      <Link href="/" className="activity-logo" aria-label="Início">
-        <span className="orbit-nav-logo" aria-hidden="true">◉</span>
-      </Link>
+      <div className="sidebar-workspace">
+        <span className="workspace-emblem">
+          <BrandMark />
+        </span>
+        <div>
+          <strong>Meu espaço</strong>
+          <span>Do seu jeito. No seu ritmo.</span>
+        </div>
+      </div>
+      <span className="sidebar-label">PRINCIPAL</span>
 
       {NAV_ITEMS.map((item) => {
         const Icon = item.icon;
@@ -135,11 +158,14 @@ function ActivityBar({
             key={item.href}
             href={item.href}
             className={`activity-item${active ? " active" : ""}`}
-            aria-label={badge > 0 ? `${item.label}, ${badge} em aberto` : item.label}
+            aria-label={
+              badge > 0 ? `${item.label}, ${badge} em aberto` : item.label
+            }
             aria-current={active ? "page" : undefined}
             title={item.label}
           >
-            <Icon size={19} strokeWidth={1.8} />
+            <Icon size={18} strokeWidth={1.7} />
+            <span className="activity-label">{item.label}</span>
             {badge > 0 ? (
               <span className="activity-badge" aria-hidden="true">
                 {formatCount(badge)}
@@ -156,7 +182,17 @@ function ActivityBar({
         aria-label="Configurações"
         title="Configurações"
       >
-        <Settings size={19} strokeWidth={1.8} />
+        <Settings size={18} strokeWidth={1.7} />
+        <span className="activity-label">Configurações</span>
+      </Link>
+      <Link className="sidebar-profile" href="/configuracoes">
+        <span className="profile-initial">
+          {name.trim().slice(0, 1).toUpperCase() || "D"}
+        </span>
+        <span>
+          <strong>{name}</strong>
+          <small>Seu painel pessoal</small>
+        </span>
       </Link>
     </nav>
   );
@@ -182,8 +218,14 @@ function Clock() {
 }
 
 function StatusBar() {
-  const { cloudConfigured, cloudPhase, syncState, syncError, pendingCount, lastSyncedAt } =
-    useStore();
+  const {
+    cloudConfigured,
+    cloudPhase,
+    syncState,
+    syncError,
+    pendingCount,
+    lastSyncedAt,
+  } = useStore();
   const { user } = useAuth();
 
   let label = "Local";
@@ -192,7 +234,8 @@ function StatusBar() {
 
   if (!cloudConfigured) {
     label = "Nuvem não configurada";
-    detail = "Preencha as variáveis públicas do Supabase para ativar a sincronização.";
+    detail =
+      "Preencha as variáveis públicas do Supabase para ativar a sincronização.";
     tone = "warning";
   } else if (cloudPhase === "choice") {
     label = "Configurar nuvem";
@@ -205,7 +248,8 @@ function StatusBar() {
     label = "Local";
     detail = "Entre na sua conta para sincronizar entre dispositivos.";
   } else if (syncState === "syncing") {
-    label = pendingCount > 0 ? `Sincronizando (${pendingCount})` : "Sincronizando";
+    label =
+      pendingCount > 0 ? `Sincronizando (${pendingCount})` : "Sincronizando";
     detail = "Enviando alterações para a nuvem.";
   } else if (syncState === "offline") {
     label = pendingCount > 0 ? `Offline (${pendingCount})` : "Offline";
@@ -228,25 +272,28 @@ function StatusBar() {
   return (
     <footer className="status-bar" aria-label="Status do workspace">
       <div className="status-group">
-        <span className="status-item" title="Branch principal">
-          <GitBranch size={11} />
-          main*
-        </span>
-        <span className="status-item" title="Nenhum problema encontrado">
-          <CircleCheck size={11} />0 problemas
-        </span>
         <span className={`status-item status-cloud ${tone}`} title={detail}>
-          {tone === "danger" ? <TriangleAlert size={11} /> : <Cloud size={11} />}
+          {tone === "danger" ? (
+            <TriangleAlert size={11} />
+          ) : (
+            <Cloud size={11} />
+          )}
           {label}
         </span>
       </div>
       <div className="status-group">
-        <span className="status-item" title={user ? "Dados sincronizados na nuvem" : "Dados salvos no navegador"}>
+        <span
+          className="status-item"
+          title={
+            user ? "Dados sincronizados na nuvem" : "Dados salvos no navegador"
+          }
+        >
           {user ? <UserRound size={11} /> : null}
           {user ? "nuvem" : "local"}
         </span>
-        <span className="status-item">UTF-8</span>
-        <span className="status-item">TypeScript</span>
+        <span className="status-item status-signature">
+          Feito para o seu dia.
+        </span>
         <span className="status-item" title="Hora local">
           <Clock />
         </span>
@@ -373,6 +420,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           pathname={normalizedPath}
           pendingTasks={pendingTasks}
           pendingShopping={pendingShopping}
+          name={data.settings.name}
         />
         <main className="app-main" id="conteudo" ref={mainRef}>
           <div className="content">{children}</div>
@@ -380,12 +428,32 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       <StatusBar />
-      <MobileBubbleMenu
-        pathname={normalizedPath}
-        pendingTasks={pendingTasks}
-        pendingShopping={pendingShopping}
+      <nav className="mobile-dock" aria-label="Navegação principal">
+        {MOBILE_NAV.map((item) => {
+          const active =
+            item.href === "/mais"
+              ? SECONDARY_PATHS.some((path) =>
+                  isActivePath(normalizedPath, path),
+                )
+              : isActivePath(normalizedPath, item.href);
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`dock-item${active ? " active" : ""}`}
+              aria-current={active ? "page" : undefined}
+            >
+              <Icon size={21} strokeWidth={active ? 2.2 : 1.7} />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </nav>
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
       />
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <CloudOverlay />
     </div>
   );
