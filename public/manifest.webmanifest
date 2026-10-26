@@ -1,16 +1,20 @@
 {
-  "name": "Dashboard pessoal",
-  "short_name": "Dashboard",
-  "description": "Tarefas, compras, finanças, metas, notas e links em um só painel com visual de editor de código.",
+  "name": "Orbit — Dashboard pessoal",
+  "short_name": "Orbit",
+  "description": "Seu universo, em ordem. Tarefas, finanças, metas e ideias no seu espaço pessoal.",
   "lang": "pt-BR",
   "dir": "ltr",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#1e1e1e",
-  "theme_color": "#1e1e1e",
-  "categories": ["productivity", "finance", "lifestyle"],
+  "background_color": "#080f18",
+  "theme_color": "#080f18",
+  "categories": [
+    "productivity",
+    "finance",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "icon.svg",

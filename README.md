@@ -1,6 +1,6 @@
-# Dashboard pessoal
+# Orbit · Dashboard pessoal
 
-Painel pessoal mobile-first com visual de editor de código (VS Code Dark Modern). Reúne tarefas,
+Painel pessoal mobile-first com identidade Orbit: superfícies escuras, luz ciano, geometria orbital e movimento sutil. Reúne tarefas,
 lista de compras, finanças, metas, notas e uma midiateca de vídeos e músicas em um único lugar.
 
 O app funciona **local-first**: sem conta, tudo fica no `localStorage` do navegador ou do WebView.

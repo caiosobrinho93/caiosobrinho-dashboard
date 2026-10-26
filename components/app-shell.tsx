@@ -25,7 +25,7 @@ import {
   NAV_ITEMS,
   SETTINGS_ITEM,
 } from "@/components/nav";
-import { stripBasePath, withBasePath } from "@/lib/base-path";
+import { stripBasePath } from "@/lib/base-path";
 import { hideNativeSplash, hapticTap, isNativeApp } from "@/lib/native";
 import { useStore } from "@/lib/store";
 
@@ -63,7 +63,7 @@ function TitleBar({
   return (
     <header className="titlebar">
       <div className="titlebar-left">
-        <span className="titlebar-title">dashboard-pessoal</span>
+        <span className="titlebar-title"><span className="orbit-logo" aria-hidden="true">◉</span> ORBIT <span className="orbit-shell-caption"> / espaço pessoal</span></span>
       </div>
 
       <button
@@ -118,7 +118,7 @@ function ActivityBar({
   return (
     <nav className="activity-bar" aria-label="Navegação do workspace">
       <Link href="/" className="activity-logo" aria-label="Início">
-        <img src={withBasePath("/icon.svg")} alt="" />
+        <span className="orbit-nav-logo" aria-hidden="true">◉</span>
       </Link>
 
       {NAV_ITEMS.map((item) => {

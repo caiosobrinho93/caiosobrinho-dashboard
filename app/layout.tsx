@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./orbit.css";
 import { Providers } from "@/components/providers";
 import { withBasePath } from "@/lib/base-path";
 
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
     template: "%s · Dashboard pessoal",
   },
   description:
-    "Tarefas, compras, finanças, metas, notas e links em um único painel pessoal com visual de editor de código.",
+    "Tarefas, compras, finanças, metas, notas e links em um único painel pessoal no seu espaço pessoal Orbit.",
   applicationName: "Dashboard pessoal",
   manifest: withBasePath("/manifest.webmanifest"),
   icons: {
@@ -34,7 +35,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#1e1e1e",
+  themeColor: "#080f18",
   colorScheme: "dark",
 };
 

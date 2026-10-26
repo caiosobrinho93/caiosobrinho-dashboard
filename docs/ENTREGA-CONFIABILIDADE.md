@@ -27,3 +27,9 @@ Publicação pelo workflow existente `.github/workflows/pages.yml`, acionado por
 - Backups sem versão continuam compatíveis com o formato legado; versão 1 é aceita e versões desconhecidas são rejeitadas.
 - Testes de regressão cobrem limite de paginação, escopo de conta, falha de rede, cursor travado e versões de backup. Teste de navegador mobile cobre cancelar, rejeitar arquivo incompatível e confirmar restauração com persistência após recarregar.
 - Nenhuma migração do Supabase é necessária. A paginação foi validada com cliente simulado; não foram usados dados ou contas reais de produção.
+
+## Identidade visual Orbit
+
+Nova camada visual em `app/orbit.css`, com tokens compartilhados, tipografia, superfícies, botões, formulários, navegação e cartões. Login com composição orbital responsiva e tela inicial com saudação, progresso real de tarefas e acesso ao dia. Ilustração CSS sem recursos externos; animação desativada com movimento reduzido. Ícones web e tema da PWA atualizados. Nenhuma alteração do formato dos dados ou migração de banco.
+
+Validação visual de login em 320, 390 e 1440 px, sem overflow horizontal; controles de senha e preferência de movimento reduzido conferidos. Testes mobile de CSV, navegação e restauração de backup preservados. O formulário de login foi inspecionado com configuração pública fictícia de teste, sem autenticação real; o deploy usa as variáveis existentes do GitHub. Corrigida também a tela inicial em modo local, que ainda mostrava o acesso à conta apesar da nuvem estar desativada.

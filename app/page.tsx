@@ -6,7 +6,7 @@ import { AuthPage } from "@/components/pages/auth-page";
 import { useAuth } from "@/components/auth-provider";
 
 export default function Page() {
-  const { user, loading } = useAuth();
+  const { user, loading, configured } = useAuth();
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [currentVersion, setCurrentVersion] = useState("1.0.0");
   const [downloadUrl, setDownloadUrl] = useState("");
@@ -22,7 +22,7 @@ export default function Page() {
       .catch(err => console.error(err));
   }, [currentVersion]);
   if (loading) return null;
-  if (!user) return <AuthPage mode="login" />;
+  if (configured && !user) return <AuthPage mode="login" />;
   return (
     <PageTransition>
       <HomePage />

@@ -19,6 +19,7 @@ import {
   Wallet,
 } from "lucide-react";
 import Link from "next/link";
+import { OrbitMark } from "@/components/orbit-mark";
 import { useMemo, useState } from "react";
 import { DonutChart, DonutLegend } from "@/components/charts/donut-chart";
 import { TransactionFormModal } from "@/components/finance/transaction-form";
@@ -173,6 +174,8 @@ export function HomePage() {
   return (
     <div className="page">
       <header className="home-hero">
+        <div className="orbit-hero-label"><span /> SEU UNIVERSO, EM ORDEM <span className="orbit-edition">PERSONAL SPACE / 01</span></div>
+        <div className="orbit-hero-copy">
         <div className="home-hero-top">
           <Breadcrumb segments={[{ label: "inicio.tsx" }]} />
           <button
@@ -200,6 +203,12 @@ export function HomePage() {
           {formatDateLong()}
           <span className="mono"> · {pluralize(pendingTasks.length, "pendência", "pendências")} no radar</span>
         </p>
+        <div className="orbit-hero-footer">
+          <Link href="/tarefas" className="orbit-focus-link">Explorar meu dia <ChevronRight size={16} /></Link>
+          <span>{taskProgress}% das tarefas concluídas</span>
+        </div>
+        </div>
+        <OrbitMark />
       </header>
 
       {!data.settings.demoBannerDismissed ? (

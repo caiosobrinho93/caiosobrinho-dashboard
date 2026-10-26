@@ -16,6 +16,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Link from "next/link";
+import { OrbitMark } from "@/components/orbit-mark";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { useAuth } from "@/components/auth-provider";
@@ -51,9 +52,14 @@ const TITLES: Record<AuthMode, { eyebrow: string; title: string; subtitle: strin
 function AuthBrand() {
   return (
     <div className="auth-brand">
-      <span className="auth-brand-app">dashboard</span>
-      <span className="auth-brand-slash">/</span>
-      <span className="auth-brand-file">acesso</span>
+      <div className="orbit-wordmark"><span className="orbit-logo" aria-hidden="true">◉</span> ORBIT <span> / dashboard pessoal</span></div>
+      <OrbitMark />
+      <div className="orbit-auth-copy">
+        <span className="orbit-kicker">MENOS RUÍDO. MAIS ESPAÇO.</span>
+        <p>Seu universo.<br /><em>Em equilíbrio.</em></p>
+        <span>Tarefas, planos e conquistas.<br />Tudo gravita em torno de você.</span>
+      </div>
+      <div className="orbit-auth-foot"><span /> UM NOVO OLHAR PARA O SEU DIA</div>
     </div>
   );
 }
