@@ -5,7 +5,7 @@ import { useEffect, useId, useState } from "react";
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from "@/lib/constants";
 import { useStore } from "@/lib/store";
 import type { Transaction, TransactionType } from "@/lib/types";
-import { formatAmountInput, parseAmount, todayISO } from "@/lib/utils";
+import { formatAmountInput, isISODate, parseAmount, todayISO } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 
 type TransactionFormModalProps = {
@@ -68,6 +68,11 @@ export function TransactionFormModal({
     }
     if (!parsedAmount || parsedAmount <= 0) {
       setError("Informe um valor maior que zero.");
+      return;
+    }
+
+    if (date && !isISODate(date)) {
+      setError("Informe uma data válida.");
       return;
     }
 

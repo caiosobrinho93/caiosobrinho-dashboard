@@ -4,6 +4,7 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   ChartPie,
+  Download,
   ChevronLeft,
   ChevronRight,
   Plus,
@@ -26,6 +27,7 @@ import { useOpenOnHash } from "@/lib/use-hash-modal";
 import {
   addMonths,
   currentMonthKey,
+  downloadTextFile,
   formatCurrency,
   formatDayLabel,
   monthKey,
@@ -35,6 +37,8 @@ import {
   sortTransactions,
   sum,
 } from "@/lib/utils";
+
+import { transactionsToCsv } from "@/lib/finance-export";
 
 type TypeFilter = "todas" | TransactionType;
 
@@ -153,6 +157,15 @@ export function FinancasPage() {
           </p>
         </div>
         <div className="page-actions">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            disabled={filteredTransactions.length === 0}
+            title="Exportar as movimentações do mês que correspondem aos filtros atuais"
+            onClick={() => downloadTextFile(`financas-${activeMonth}.csv`, transactionsToCsv(filteredTransactions), "text/csv;charset=utf-8")}
+          >
+            <Download size={14} /> Exportar CSV
+          </button>
           <div className="month-switcher">
             <button
               type="button"

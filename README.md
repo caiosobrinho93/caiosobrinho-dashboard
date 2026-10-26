@@ -15,7 +15,7 @@ estáticos em `out/`, que são sincronizados para o projeto nativo em `android/`
 - **Início** — saudação, resumo do dia, indicadores, tarefas, finanças, compras, metas e links recentes.
 - **Tarefas** — criação rápida, prioridade, lista, prazo, filtros, busca, conclusão e edição.
 - **Compras** — itens por categoria, quantidade, unidade, preço, total estimado e carrinho.
-- **Finanças** — receitas e despesas por mês, saldo, orçamento, gráfico de categorias e histórico de 6 meses.
+- **Finanças** — receitas e despesas por mês, saldo, orçamento, gráfico de categorias e histórico de 6 meses. Exportação CSV respeita o mês, busca e tipo selecionados; inclui proteção contra fórmulas em campos de texto.
 - **Mídia** — vídeos e músicas separados por abas, prévias do YouTube, favoritos, tags, busca e edição.
 - **Metas** — valor-alvo, progresso, prazo, unidade, contribuições e destaque por cor.
 - **Notas** — grade estilo mural, busca, fixação no topo, cores e edição.
@@ -72,6 +72,7 @@ Projetos antigos também podem usar `NEXT_PUBLIC_SUPABASE_ANON_KEY` no lugar da 
 
 ```bash
 npm run dev          # servidor de desenvolvimento
+npm test             # regressões de valores, datas, links, backups e CSV
 npm run typecheck    # checagem de tipos
 npm run build        # exportação estática em out/ + payloads RSC para uso offline
 npm run preview      # serve o build estático em http://localhost:4173

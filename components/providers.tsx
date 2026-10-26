@@ -22,7 +22,7 @@ export function Providers({ children }: { children: ReactNode }) {
 }
 
 function AuthGuard({ children }: { children: ReactNode }) {
-  const { user, loading } = useAuth();
+  const { user, loading, configured } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -30,13 +30,13 @@ function AuthGuard({ children }: { children: ReactNode }) {
   const isAuthRoute = AUTH_PATHS.includes(normalizedPath);
 
   useEffect(() => {
-    if (!loading && !user && !isAuthRoute) {
+    if (configured && !loading && !user && !isAuthRoute) {
       router.replace("/entrar");
     }
-  }, [loading, user, router, isAuthRoute]);
+  }, [configured, loading, user, router, isAuthRoute]);
 
   if (loading) return null;
-  if (!user && !isAuthRoute) return null;
+  if (configured && !user && !isAuthRoute) return null;
 
   return <>{children}</>;
 }

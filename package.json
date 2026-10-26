@@ -13,7 +13,8 @@
     "android:open": "cap open android",
     "android:run": "npm run android:sync && cap run android",
     "android:apk": "npm run android:sync && node scripts/android-build.mjs",
-    "android:assets": "node scripts/generate-android-assets.mjs"
+    "android:assets": "node scripts/generate-android-assets.mjs",
+    "test": "node --test tests/*.test.cjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.3",
@@ -35,6 +36,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "sharp": "^0.35.5",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   }
 }

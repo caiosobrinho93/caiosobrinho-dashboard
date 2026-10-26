@@ -9,7 +9,7 @@ import type {
   Transaction,
   Goal,
 } from "./types";
-import { stableUuid, todayISO, toISODate, uid } from "./utils";
+import { isISODate, normalizeUrl, stableUuid, todayISO, toISODate, uid } from "./utils";
 
 type RecordLike = Record<string, unknown>;
 
@@ -26,7 +26,7 @@ function number(value: unknown, fallback = 0): number {
 }
 
 function dateString(value: unknown, fallback: string): string {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : fallback;
+  return isISODate(value) ? value : fallback;
 }
 
 function timestamp(value: unknown, fallback: string): string {
@@ -103,7 +103,7 @@ function normalizeTransaction(raw: unknown): Transaction | null {
 function normalizeMedia(raw: unknown): MediaLink | null {
   if (!isRecord(raw)) return null;
   const title = text(raw.title).trim();
-  const url = text(raw.url).trim();
+  const url = normalizeUrl(text(raw.url));
   if (!title || !url) return null;
   return {
     id: normalizeId(raw.id),

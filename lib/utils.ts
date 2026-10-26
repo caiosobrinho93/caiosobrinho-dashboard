@@ -89,6 +89,12 @@ export function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+export function isISODate(value: unknown): value is string {
+  if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T12:00:00Z`);
+  return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export function todayISO(): string {
   return toISODate(new Date());
 }
@@ -265,7 +271,8 @@ export function parseAmount(input: string): number {
   } else if (/^\d{1,3}(\.\d{3})+$/.test(clean)) {
     normalized = clean.replace(/\./g, "");
   }
-  const value = Number.parseFloat(normalized);
+  if (!/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)$/.test(normalized)) return 0;
+  const value = Number(normalized);
   return Number.isFinite(value) ? value : 0;
 }
 
@@ -305,7 +312,7 @@ export function getYouTubeId(url: string): string | null {
     if (host === "youtu.be") {
       return parsed.pathname.slice(1).split("/")[0] || null;
     }
-    if (host.endsWith("youtube.com")) {
+    if (host === "youtube.com" || host.endsWith(".youtube.com")) {
       if (parsed.searchParams.get("v")) return parsed.searchParams.get("v");
       const match = parsed.pathname.match(/\/(embed|shorts|live)\/([^/?]+)/);
       if (match) return match[2];
@@ -367,7 +374,8 @@ export function sortTransactions(transactions: Transaction[]): Transaction[] {
 
 export function isDoneToday(task: Task): boolean {
   if (!task.done || !task.completedAt) return false;
-  return task.completedAt.slice(0, 10) === todayISO();
+  const completed = new Date(task.completedAt);
+  return Number.isFinite(completed.getTime()) && toISODate(completed) === todayISO();
 }
 
 export function downloadTextFile(filename: string, content: string, type: string): void {
