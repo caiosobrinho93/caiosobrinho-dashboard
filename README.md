@@ -110,7 +110,7 @@ Rotas de conta:
 Comportamento:
 
 1. Sem conta, o app continua no modo local com a chave `dashboard-pessoal.v1`.
-2. Ao entrar, o app carrega o cache específico daquela conta e busca a versão da nuvem.
+2. Ao entrar, o app carrega o cache específico daquela conta e busca a versão da nuvem. As listas são paginadas por identificador para carregar também contas acima do limite de uma resposta do Supabase.
 3. No primeiro acesso, se houver dados dos dois lados, você escolhe importar o dispositivo ou usar a nuvem.
 4. Cada alteração é aplicada de forma otimista e entra em uma fila local.
 5. A fila é enviada em ordem, deduplicada por tabela + registro, e tenta novamente quando a conexão volta.
@@ -128,7 +128,7 @@ O schema, as políticas RLS e os detalhes de operação estão em
 - O botão **Começar do zero** (ou **Apagar todos os dados**) remove os registros e mantém nome,
   orçamento e cor.
 - **Configurações → Dados e backup** permite exportar e importar um JSON completo.
-- A importação valida o arquivo com `lib/normalize.ts` antes de substituir os dados.
+- A importação valida o arquivo com `lib/normalize.ts`, rejeita versões não suportadas e mostra um resumo para confirmação antes de substituir os dados. Cancelar mantém os dados atuais.
 - Não há telemetria. Notas e finanças não são enviadas para nenhum serviço além do Supabase da sua conta.
 - A chave pública do Supabase pode ficar no cliente; a autorização real é feita pelas políticas RLS.
 

@@ -19,3 +19,11 @@ Esta entrega pertence ao `caiosobrinho-dashboard`, publicado no GitHub Pages. O 
 Sem migração do banco ou alteração das chaves de armazenamento. O build continua estático, com o mesmo subcaminho do GitHub Pages e o mesmo fluxo Android. A entrega não inclui alteração do APK, redesign, novos projetos ou uma auditoria completa do mecanismo de sincronização. Testes locais não substituem a verificação de login e RLS com contas reais.
 
 Publicação pelo workflow existente `.github/workflows/pages.yml`, acionado por push na main. As variáveis Supabase existentes permanecem nas configurações do GitHub; não devem ser copiadas para o repositório.
+
+## Segunda entrega — recuperação e listas na nuvem
+
+- Consultas de tarefas, compras, movimentações, mídias, metas e notas percorrem páginas por ID, mantendo o filtro da conta. O carregamento continua até uma página vazia, inclusive se o servidor limitar a resposta abaixo de 500 registros. Falha em uma página cancela o resultado, evitando tratar uma lista incompleta como uma sincronização concluída. Isso não constitui um snapshot transacional entre dispositivos.
+- Antes de importar um JSON, a tela mostra contagens por seção e pede confirmação. Cancelar não substitui dados. Trocar de conta fecha a confirmação pendente.
+- Backups sem versão continuam compatíveis com o formato legado; versão 1 é aceita e versões desconhecidas são rejeitadas.
+- Testes de regressão cobrem limite de paginação, escopo de conta, falha de rede, cursor travado e versões de backup. Teste de navegador mobile cobre cancelar, rejeitar arquivo incompatível e confirmar restauração com persistência após recarregar.
+- Nenhuma migração do Supabase é necessária. A paginação foi validada com cliente simulado; não foram usados dados ou contas reais de produção.

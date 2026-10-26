@@ -157,6 +157,8 @@ export function normalizeDashboardData(
   options: { requireArrays?: boolean } = {},
 ): DashboardData | null {
   if (!isRecord(raw)) return null;
+  // Unversioned backups are legacy v1; unknown versions require an explicit migration.
+  if (raw.version !== undefined && raw.version !== 1) return null;
 
   const arrayKeys = ["tasks", "shopping", "transactions", "media", "goals", "notes"] as const;
   if (options.requireArrays && !arrayKeys.every((key) => Array.isArray(raw[key]))) {

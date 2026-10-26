@@ -30,6 +30,8 @@ import { Panel } from "@/components/ui/panel";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ACCENTS } from "@/lib/constants";
 import { useStore } from "@/lib/store";
+import { normalizeDashboardData } from "@/lib/normalize";
+import type { DashboardData } from "@/lib/types";
 import type { AccentKey } from "@/lib/types";
 import {
   downloadTextFile,
@@ -79,6 +81,7 @@ export function ConfiguracoesPage() {
   const [budget, setBudget] = useState(formatAmountInput(settings.monthlyBudget));
   const [accent, setAccent] = useState<AccentKey>(settings.accent);
   const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [pendingImport, setPendingImport] = useState<DashboardData | null>(null);
   const [confirmation, setConfirmation] = useState<Confirmation>(null);
   const [guestImportOpen, setGuestImportOpen] = useState(false);
   const [syncBusy, setSyncBusy] = useState(false);
@@ -98,6 +101,8 @@ export function ConfiguracoesPage() {
   useEffect(() => {
     setAccent(settings.accent);
   }, [settings.accent]);
+
+  useEffect(() => { setPendingImport(null); }, [user?.id]);
 
   useEffect(() => {
     if (user) return;
@@ -251,15 +256,12 @@ export function ConfiguracoesPage() {
     try {
       const raw = await file.text();
       const payload: unknown = JSON.parse(raw);
-      if (!importData(payload)) {
-        notify("Backup inválido: faltam listas ou o formato não é reconhecido.", "error");
+      const normalized = normalizeDashboardData(payload, { requireArrays: true });
+      if (!normalized) {
+        notify("Backup inválido ou de uma versão não suportada. Seus dados foram mantidos.", "error");
         return;
       }
-      notify(
-        user
-          ? "Backup importado. Os dados foram substituídos neste dispositivo e serão sincronizados."
-          : "Backup importado. Seus dados foram substituídos.",
-      );
+      setPendingImport(normalized);
     } catch {
       notify("Não foi possível ler o arquivo. Verifique se é um JSON válido.", "error");
     }
@@ -698,6 +700,24 @@ export function ConfiguracoesPage() {
         </div>
       </div>
 
+      <ConfirmDialog
+        open={pendingImport !== null}
+        onClose={() => setPendingImport(null)}
+        title="Substituir dados pelo backup?"
+        description={pendingImport
+          ? `O backup contém ${pendingImport.tasks.length} tarefas, ${pendingImport.shopping.length} itens de compras, ${pendingImport.transactions.length} movimentações, ${pendingImport.media.length} mídias, ${pendingImport.goals.length} metas e ${pendingImport.notes.length} notas. Os dados atuais serão substituídos${user ? " e a alteração será sincronizada com sua conta" : " neste dispositivo"}. Exporte um backup antes de continuar.`
+          : ""}
+        confirmLabel="Importar e substituir"
+        onConfirm={() => {
+          if (!pendingImport) return;
+          if (!importData(pendingImport)) {
+            notify("Não foi possível importar o backup. Seus dados foram mantidos.", "error");
+            return;
+          }
+          setPendingImport(null);
+          notify(user ? "Backup importado. A alteração será sincronizada com sua conta." : "Backup importado neste dispositivo.");
+        }}
+      />
       <ConfirmDialog
         open={confirmation === "demo"}
         onClose={() => setConfirmation(null)}

@@ -1,3 +1,4 @@
+import { fetchUserRows } from "./paginated-query";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { CloudMutation } from "@/lib/cloud/queue";
 import type { DashboardData, Settings } from "@/lib/types";
@@ -60,30 +61,24 @@ export async function fetchRemoteDashboard(
 ): Promise<DashboardData> {
   const [settings, tasks, shopping, transactions, media, goals, notes] = await Promise.all([
     client.from("dashboard_settings").select("*").eq("user_id", userId).maybeSingle(),
-    client.from("tasks").select("*").eq("user_id", userId),
-    client.from("shopping_items").select("*").eq("user_id", userId),
-    client.from("transactions").select("*").eq("user_id", userId),
-    client.from("media_links").select("*").eq("user_id", userId),
-    client.from("goals").select("*").eq("user_id", userId),
-    client.from("notes").select("*").eq("user_id", userId),
+    fetchUserRows(client, "tasks", userId),
+    fetchUserRows(client, "shopping_items", userId),
+    fetchUserRows(client, "transactions", userId),
+    fetchUserRows(client, "media_links", userId),
+    fetchUserRows(client, "goals", userId),
+    fetchUserRows(client, "notes", userId),
   ]);
 
   throwIfError(settings.error);
-  throwIfError(tasks.error);
-  throwIfError(shopping.error);
-  throwIfError(transactions.error);
-  throwIfError(media.error);
-  throwIfError(goals.error);
-  throwIfError(notes.error);
 
   const snapshot: RemoteSnapshot = {
     settings: (settings.data as SettingsRow | null) ?? null,
-    tasks: (tasks.data as TaskRow[] | null) ?? [],
-    shopping: (shopping.data as ShoppingRow[] | null) ?? [],
-    transactions: (transactions.data as TransactionRow[] | null) ?? [],
-    media: (media.data as MediaRow[] | null) ?? [],
-    goals: (goals.data as GoalRow[] | null) ?? [],
-    notes: (notes.data as NoteRow[] | null) ?? [],
+    tasks: (tasks as TaskRow[] | null) ?? [],
+    shopping: (shopping as ShoppingRow[] | null) ?? [],
+    transactions: (transactions as TransactionRow[] | null) ?? [],
+    media: (media as MediaRow[] | null) ?? [],
+    goals: (goals as GoalRow[] | null) ?? [],
+    notes: (notes as NoteRow[] | null) ?? [],
   };
 
   return snapshotToDashboard(snapshot, fallbackName);
