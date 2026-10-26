@@ -1168,6 +1168,8 @@ select.input {
     padding: 28px 22px calc(110px + var(--safe-bottom)) !important;
   }
   .mobile-dock {
+    /* Keep navigation outside the route snapshot that fades/slides. */
+    view-transition-name: mobile-dock;
     display: flex;
     position: fixed;
     z-index: 80;
@@ -1502,4 +1504,16 @@ select.input {
 }
 @media (min-width: 1000px) and (max-width: 1240px) {
   .stat-value.small { font-size: 25px; }
+}
+
+/* The dock is a persistent anchor while the page content transitions. */
+::view-transition-group(mobile-dock) {
+  animation: none;
+  z-index: 100;
+}
+::view-transition-old(mobile-dock) {
+  display: none;
+}
+::view-transition-new(mobile-dock) {
+  animation: none;
 }
